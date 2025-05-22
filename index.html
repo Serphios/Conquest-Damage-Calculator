@@ -92,6 +92,8 @@
         <label><input type="checkbox" id="opportunists"> Opportunists (reroll all hit rolls if Flank/Rear)</label>
         <label><input type="checkbox" id="flawless"> Flawless Strikes (Rolls of 1 ignore defense)</label>
 		<label><input type="checkbox" id="deadlyBlades"> Deadly Blades (Defense rolls of 6 cause 2 wounds + 2 resolve checks)</label>
+		<label><input type="checkbox" id="gloriousCharge"> Glorious Charge (+1 Clash & Terrifying 1 for Impact Attacks)</label>
+		<label><input type="checkbox" id="linebreaker"> Linebreaker (Ignores Shield and Bastion)</label>
       </div>
     </div>
     <div class="section">
@@ -105,10 +107,17 @@
         <input type="number" id="evasion" value="0">
         <label>Resolve Value:</label>
         <input type="number" id="resolve" value="2">
+		<label>Hardened:</label>
+		<input type="number" id="hardened" value="0">
+		<label>Indomitable:</label>
+	    <input type="number" id="indomitable" value="0">
+		<label>Bastion:</label>
+	    <input type="number" id="bastion" value="0">
         <label>Flank or Rear Attack:</label>
         <input type="checkbox" id="flankRear">
         <label>Ignore Resolve:</label>
         <input type="checkbox" id="ignoreResolve">
+		<label><input type="checkbox" id="shield"> Shield (+1 Defense unless Flank/Rear)</label>
         <label><input type="checkbox" id="duelDeclined"> Duel Declined (reroll resolve rolls of 1)</label>
         <label>Defender Blessed Usage:</label>
         <select id="defenderBlessed">
@@ -143,7 +152,13 @@
       const defense = +document.getElementById('defense').value;
       const evasion = +document.getElementById('evasion').value;
       const resolve = +document.getElementById('resolve').value;
+	  const hardened = +document.getElementById('hardened').value;
 	  const defenderStands = +document.getElementById('defenderStands').value;
+	  const indomitable = +document.getElementById('indomitable').value;
+	  const gloriousCharge = document.getElementById('gloriousCharge').checked;
+	  const shield = document.getElementById('shield').checked;
+	  const bastion = +document.getElementById('bastion').value;
+	  const linebreaker = document.getElementById('linebreaker').checked;
 
 		let resolveBonus = 0;
 		if (defenderStands >= 4 && defenderStands <= 6) {
@@ -174,7 +189,10 @@
       const support = +document.getElementById('support').value;
 	  const standsInContact = Math.min(models, +document.getElementById('standsInContact').value);
 	  const nonContactStands = models - standsInContact;
-	  const totalAttacks = standsInContact * attacks + nonContactStands * support + (leader ? 1 : 0);
+	  let totalAttacks = 0;
+	  if (attacks > 0) {
+	  totalAttacks = standsInContact * attacks + nonContactStands * support + (leader ? 1 : 0);
+	  }
       let clashValue = inspired ? Math.min(clash + 1, 4) : clash;
       const rerollSixes = inspired && clash + 1 > 4;
       const baseHitChance = clashValue / 6;
@@ -186,15 +204,27 @@
       }
 
       const totalImpact = models * impact;
-      const impactHitChance = clash / 6;
+      let clashImpact = clash;
+	  if (gloriousCharge) clashImpact += 1;
+	  const impactHitChance = clashImpact / 6;
       let impactHits = totalImpact * impactHitChance;
       if ((attackerBlessed && attackerBlessedUsage === 'impact') || flurry || (opportunists && flankRear)) {
         impactHits += totalImpact * (1 - impactHitChance) * impactHitChance;
       }
+	  let effectiveDefense = defense;
 
-      const saveNormal = Math.max(defense - cleave, evasion);
-      const saveImpact = Math.max(defense - brutalImpact, evasion);
-      const saveTrample = Math.max(defense, evasion);
+	  if (!linebreaker) {
+	  effectiveDefense += bastion;
+	  if (shield && !flankRear) {
+	  effectiveDefense += 1;
+	  }
+	  }
+      const reducedCleave = Math.max(0, cleave - hardened);
+	  const reducedBrutalImpact = Math.max(0, brutalImpact - hardened);
+
+	  const saveNormal = Math.max(effectiveDefense - reducedCleave, evasion);
+	  const saveImpact = Math.max(effectiveDefense - reducedBrutalImpact, evasion);
+      const saveTrample = Math.max(effectiveDefense, evasion);
 
       let saveChanceNormal = Math.min(saveNormal, 6) / 6;
       let saveChanceImpact = Math.min(saveImpact, 6) / 6;
@@ -203,7 +233,8 @@
       if (blessedUsage === 'normal') saveChanceNormal += (1 - saveChanceNormal) * saveChanceNormal;
       if (blessedUsage === 'impact') saveChanceImpact += (1 - saveChanceImpact) * saveChanceImpact;
 
-      const resolveVal = Math.max(1, effectiveResolve - (ignoreTerrifying ? 0 : terrifying));
+      const totalTerrifying = terrifying + (gloriousCharge ? 1 : 0);
+	  const resolveVal = Math.max(1, effectiveResolve - (ignoreTerrifying ? 0 : totalTerrifying));
       let resolveChance = ignoreResolve ? 1 : Math.min(resolveVal, 5) / 6;
       if (duelDeclined && !ignoreResolve) resolveChance -= (1 / 6) * (1 / 6);
 
@@ -213,27 +244,34 @@
       const saveFlawless = Math.max(evasion, 0);
       const saveChanceFlawless = Math.min(saveFlawless, 6) / 6;
 
-      const failedSavesFlawless = flawlessHits * (1 - saveChanceFlawless);
+	  const failedSavesFlawless = flawlessHits * (1 - saveChanceFlawless);
       let failedResolveFlawless = failedSavesFlawless * (1 - resolveChance);
-      if (flankRear && !ignoreResolve) failedResolveFlawless += failedSavesFlawless * resolveChance * (1 - resolveChance);
+	  if (flankRear && !ignoreResolve) {
+	  failedResolveFlawless += failedSavesFlawless * resolveChance * (1 - resolveChance);
+	  }
+	  failedResolveFlawless = Math.max(0, failedResolveFlawless - indomitable);
 
-  let baseFailedSaves = regularHits * (1 - saveChanceNormal);
-let deadlyHits = 0;
-let failedSaves = baseFailedSaves;
+	  let baseFailedSaves = regularHits * (1 - saveChanceNormal);
+	  let deadlyHits = 0;
+	  let failedSaves = baseFailedSaves;
 
-if (deadlyBlades) {
-  deadlyHits = baseFailedSaves * (1 / 6); // 6er unter den Fehlwürfen
-  failedSaves = deadlyHits * 2 + (baseFailedSaves - deadlyHits); // 2 Wunden für 6er, 1 für Rest
-}
+	  if (deadlyBlades) {
+	  deadlyHits = baseFailedSaves * (1 / 6); // 6er unter den Fehlwürfen
+	  failedSaves = deadlyHits * 2 + (baseFailedSaves - deadlyHits); // 2 Wunden für 6er, 1 für Rest
+	  }
 
-let failedResolve = failedSaves * (1 - resolveChance);
-if (flankRear && !ignoreResolve) {
-  failedResolve += failedSaves * resolveChance * (1 - resolveChance);
-}
+	  let failedResolve = failedSaves * (1 - resolveChance);
+	  if (flankRear && !ignoreResolve) {
+	  failedResolve += failedSaves * resolveChance * (1 - resolveChance);
+	  }
+	  failedResolve = Math.max(0, failedResolve - indomitable);
 
       const failedImpactSaves = impactHits * (1 - saveChanceImpact);
       let failedImpactResolve = failedImpactSaves * (1 - resolveChance);
-      if (flankRear && !ignoreResolve) failedImpactResolve += failedImpactSaves * resolveChance * (1 - resolveChance);
+	  if (flankRear && !ignoreResolve) {
+	  failedImpactResolve += failedImpactSaves * resolveChance * (1 - resolveChance);
+	  }
+	  failedImpactResolve = Math.max(0, failedImpactResolve - indomitable);
 
       const trampleHits = models * trample;
       const trampleWounds = trampleHits * (1 - saveChanceTrample);
