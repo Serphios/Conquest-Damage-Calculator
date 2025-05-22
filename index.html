@@ -91,6 +91,7 @@
         <label><input type="checkbox" id="flurry"> Flurry (reroll all hit rolls)</label>
         <label><input type="checkbox" id="opportunists"> Opportunists (reroll all hit rolls if Flank/Rear)</label>
         <label><input type="checkbox" id="flawless"> Flawless Strikes (Rolls of 1 ignore defense)</label>
+		<label><input type="checkbox" id="deadlyBlades"> Deadly Blades (Defense rolls of 6 cause 2 wounds + 2 resolve checks)</label>
       </div>
     </div>
     <div class="section">
@@ -115,6 +116,12 @@
           <option value="normal">Normal Attack</option>
           <option value="impact">Impact Attack</option>
         </select>
+		<label>Bravery / Fearless:</label>
+<select id="bravery">
+  <option value="none">None</option>
+  <option value="bravery">Bravery</option>
+  <option value="fearless">Fearless</option>
+</select>
       </div>
     </div>
     <div class="section">
@@ -132,7 +139,7 @@
       const cleave = +document.getElementById('cleave').value;
       const brutalImpact = +document.getElementById('brutalImpact').value;
       const trample = +document.getElementById('trample').value;
-
+	  const deadlyBlades = document.getElementById('deadlyBlades').checked;
       const defense = +document.getElementById('defense').value;
       const evasion = +document.getElementById('evasion').value;
       const resolve = +document.getElementById('resolve').value;
@@ -149,6 +156,8 @@
 
 	  const effectiveResolve = resolve + resolveBonus;
       const terrifying = +document.getElementById('terrifying').value;
+	  const braveryType = document.getElementById('bravery').value;
+	  const ignoreTerrifying = braveryType === 'bravery' || braveryType === 'fearless';
       const flankRear = document.getElementById('flankRear').checked;
       const ignoreResolve = document.getElementById('ignoreResolve').checked;
       const duelDeclined = document.getElementById('duelDeclined').checked;
@@ -194,7 +203,7 @@
       if (blessedUsage === 'normal') saveChanceNormal += (1 - saveChanceNormal) * saveChanceNormal;
       if (blessedUsage === 'impact') saveChanceImpact += (1 - saveChanceImpact) * saveChanceImpact;
 
-      const resolveVal = Math.max(1, effectiveResolve - terrifying);
+      const resolveVal = Math.max(1, effectiveResolve - (ignoreTerrifying ? 0 : terrifying));
       let resolveChance = ignoreResolve ? 1 : Math.min(resolveVal, 5) / 6;
       if (duelDeclined && !ignoreResolve) resolveChance -= (1 / 6) * (1 / 6);
 
@@ -208,9 +217,19 @@
       let failedResolveFlawless = failedSavesFlawless * (1 - resolveChance);
       if (flankRear && !ignoreResolve) failedResolveFlawless += failedSavesFlawless * resolveChance * (1 - resolveChance);
 
-      const failedSaves = regularHits * (1 - saveChanceNormal);
-      let failedResolve = failedSaves * (1 - resolveChance);
-      if (flankRear && !ignoreResolve) failedResolve += failedSaves * resolveChance * (1 - resolveChance);
+  let baseFailedSaves = regularHits * (1 - saveChanceNormal);
+let deadlyHits = 0;
+let failedSaves = baseFailedSaves;
+
+if (deadlyBlades) {
+  deadlyHits = baseFailedSaves * (1 / 6); // 6er unter den Fehlwürfen
+  failedSaves = deadlyHits * 2 + (baseFailedSaves - deadlyHits); // 2 Wunden für 6er, 1 für Rest
+}
+
+let failedResolve = failedSaves * (1 - resolveChance);
+if (flankRear && !ignoreResolve) {
+  failedResolve += failedSaves * resolveChance * (1 - resolveChance);
+}
 
       const failedImpactSaves = impactHits * (1 - saveChanceImpact);
       let failedImpactResolve = failedImpactSaves * (1 - resolveChance);
