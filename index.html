@@ -85,8 +85,11 @@
     border-left: 4px solid #4caf50;
     font-family: monospace;
   }
+  h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <h1>Conquest Damage Calculator</h1>
@@ -102,8 +105,6 @@
         <input type="number" id="support" value="1">
         <label>Attacks per Stand:</label>
         <input type="number" id="attacks" value="4">
-        <label>Impact Attacks per Stand:</label>
-        <input type="number" id="impact" value="0">
         <label>Clash Value:</label>
         <input type="number" id="cllash" value="3">
         
@@ -131,6 +132,7 @@
 	<option value="brutalImpactBonus" data-type="numeric">Brutal Impact</option>
 	<option value="trampleBonus" data-type="numeric">Trample</option>
 	<option value="terrifyingBonus" data-type="numeric">Terrifying</option>
+	<option value="impactBonus" data-type="numeric">Impact Attacks</option>
   </select>
   <button type="button" onclick="addAttackerRule()">Add</button>
 </div>
@@ -165,37 +167,45 @@
         <input type="number" id="evasion" value="0">
         <label>Resolve Value:</label>
         <input type="number" id="resolve" value="2">
-        <label>Hardened:</label>
-        <input type="number" id="hardened" value="0">
-        <label>Indomitable:</label>
-        <input type="number" id="indomitable" value="0">
-        <label>Bastion:</label>
-        <input type="number" id="bastion" value="0">
-		<label>Tenacious:</label>
-		<input type="number" id="tenacious" value="0">
+
+		<!-- Defender Special Rules -->
+<div>
+  <label for="defenderSpecialRules">Add Special Rule:</label>
+  <select id="defenderSpecialRules">
+    <option value="">-- Select --</option>
+    <option value="hardened" data-type="numeric">Hardened</option>
+    <option value="indomitable" data-type="numeric">Indomitable</option>
+    <option value="bastion" data-type="numeric">Bastion</option>
+    <option value="tenacious" data-type="numeric">Tenacious</option>
+    <option value="flankRear">Flank or Rear Attack</option>
+    <option value="ignoreResolve">Ignore Resolve</option>
+    <option value="oblivious">Oblivious</option>
+    <option value="shield">Shield</option>
+    <option value="parry">Parry</option>
+    <option value="phalanx">Phalanx</option>
+    <option value="duelDeclined">Duel Declined</option>
+    <option value="untouchable">Untouchable</option>
+    <option value="blessed">Blessed</option>
+    <option value="bravery">Bravery</option>
+    <option value="fearless">Fearless</option>
+  </select>
+  <button type="button" onclick="addDefenderRule()">Add</button>
+</div>
 
 
-        <!-- Verteidiger-Regeln -->
-        <label><input type="checkbox" id="flankRear"> Flank or Rear Attack</label>
-        <label><input type="checkbox" id="ignoreResolve"> Ignore Resolve</label>
-        <label><input type="checkbox" id="oblivious"> Oblivious (1 wound per 2 failed resolve checks)</label>
-        <label><input type="checkbox" id="shield"> Shield (+1 Defense unless Flank/Rear)</label>
-        <label><input type="checkbox" id="parry"> Parry (Attacker cannot reroll hit rolls)</label>
-        <label><input type="checkbox" id="phalanx"> Phalanx (+1 Defense and Resolve if not Flank/Rear)</label>
-        <label><input type="checkbox" id="duelDeclined"> Duel Declined (reroll resolve rolls of 1)</label>
-		<label><input type="checkbox" id="untouchable"> Untouchable (Reroll failed defense rolls of 6)</label>
-        <label>Defender Blessed Usage:</label>
-        <select id="defenderBlessed">
-          <option value="none">None</option>
-          <option value="normal">Normal Attack</option>
-          <option value="impact">Impact Attack</option>
-        </select>
-        <label>Bravery / Fearless:</label>
-        <select id="bravery">
-          <option value="none">None</option>
-          <option value="bravery">Bravery</option>
-          <option value="fearless">Fearless</option>
-        </select>
+
+<!-- Display selected rules -->
+<ul id="defenderRulesList" style="margin-top: 10px; list-style: none; padding: 0;"></ul>
+
+<!-- Conditional input for Blessed Usage -->
+<div id="defenderBlessedContainer" style="display: none; margin-top: 10px;">
+  <label for="defenderBlessed">Blessed Usage:</label>
+  <select id="defenderBlessed">
+    <option value="none">None</option>
+    <option value="normal">Normal Attack</option>
+    <option value="impact">Impact Attack</option>
+  </select>
+</div>
       </div>
     </div>
 
@@ -207,9 +217,14 @@
     <div class="result" id="result"></div>
 	<canvas id="woundChart" style="max-width: 1000px; margin-top: 30px;"></canvas>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 const activeAttackerRules = new Set();
 const numericAttackerRules = {};
+
+const activeDefenderRules = new Set();
+const numericDefenderRules = {};
+
 
 function addAttackerRule() {
   const select = document.getElementById("attackerSpecialRules");
@@ -238,6 +253,109 @@ function addAttackerRule() {
 
   select.value = "";
 }
+
+
+function addDefenderRule() {
+  const select = document.getElementById("defenderSpecialRules");
+  const value = select.value;
+  const text = select.options[select.selectedIndex].text;
+  const type = select.options[select.selectedIndex].dataset.type || "toggle";
+
+  if (!value) return;
+
+  if (type === "toggle") {
+    if (activeDefenderRules.has(value)) return;
+    activeDefenderRules.add(value);
+
+    // Show Blessed Usage dropdown when blessed is added
+    if (value === "blessed") {
+      document.getElementById("defenderBlessedContainer").style.display = "block";
+    }
+
+    addDefenderRuleToUI(value, text, type);
+  } else if (type === "numeric") {
+    const current = numericDefenderRules[value] || 0;
+    const input = prompt(`Enter value for ${text}:`, current || 1);
+    const parsed = parseInt(input);
+    if (isNaN(parsed) || parsed <= 0) return;
+
+    numericDefenderRules[value] = parsed;
+    addDefenderRuleToUI(value, `${text} +${parsed}`, type);
+  }
+
+  select.value = "";
+}
+
+function addDefenderRuleToUI(key, labelText, type) {
+  const list = document.getElementById("defenderRulesList");
+  const existing = document.getElementById("def_rule_" + key);
+  if (existing) existing.remove();
+
+  const li = document.createElement("li");
+  li.id = "def_rule_" + key;
+  li.style.marginBottom = "5px";
+
+  const label = document.createElement("span");
+  label.textContent = labelText + " ";
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "❌";
+  removeBtn.style.marginLeft = "10px";
+  removeBtn.onclick = () => {
+    if (type === "toggle") activeDefenderRules.delete(key);
+    if (type === "numeric") delete numericDefenderRules[key];
+    li.remove();
+
+    // Hide Blessed dropdown if "blessed" rule is removed
+    if (key === "blessed") {
+      document.getElementById("defenderBlessedContainer").style.display = "none";
+    }
+  };
+
+  li.appendChild(label);
+  li.appendChild(removeBtn);
+  list.appendChild(li);
+}
+
+
+function isDefenderRuleActive(ruleId) {
+  return activeDefenderRules.has(ruleId);
+}
+
+
+function addDefenderRuleToUI(key, labelText, type) {
+  const list = document.getElementById("defenderRulesList");
+  const existing = document.getElementById("def_rule_" + key);
+  if (existing) existing.remove();
+
+  const li = document.createElement("li");
+  li.id = "def_rule_" + key;
+  li.style.marginBottom = "5px";
+
+  const label = document.createElement("span");
+  label.textContent = labelText + " ";
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "❌";
+  removeBtn.style.marginLeft = "10px";
+  removeBtn.onclick = () => {
+    if (type === "toggle") activeDefenderRules.delete(key);
+    if (type === "numeric") delete numericDefenderRules[key];
+    li.remove();
+    if (key === "blessed") {
+      document.getElementById("defenderBlessedContainer").style.display = "none";
+    }
+  };
+
+  li.appendChild(label);
+  li.appendChild(removeBtn);
+  list.appendChild(li);
+}
+
+function isDefenderRuleActive(ruleId) {
+  return activeDefenderRules.has(ruleId);
+}
+
 function addRuleToUI(key, labelText, type) {
   const list = document.getElementById("attackerRulesList");
   const existing = document.getElementById("rule_" + key);
@@ -289,7 +407,6 @@ function calculateDamage() {
   // === INPUTS: Angreifer ===
   const models = +document.getElementById('models').value;
   const attacks = +document.getElementById('attacks').value;
-  const impact = +document.getElementById('impact').value;
   const clash = +document.getElementById('cllash').value;
   const leader = document.getElementById('leader').checked;
   const inspired = document.getElementById('inspired').checked;
@@ -307,6 +424,7 @@ const cleave = numericAttackerRules['cleaveBonus'] || 0;
 const brutalImpact = numericAttackerRules['brutalImpactBonus'] || 0;
 const trample = numericAttackerRules['trampleBonus'] || 0;
 const terrifying = numericAttackerRules['terrifyingBonus'] || 0;
+const impactBonus = numericAttackerRules['impactBonus'] || 0;
 
 
 
@@ -324,22 +442,23 @@ const terrifying = numericAttackerRules['terrifyingBonus'] || 0;
   const defense = +document.getElementById('defense').value;
   const evasion = +document.getElementById('evasion').value;
   const resolve = +document.getElementById('resolve').value;
-  const hardened = +document.getElementById('hardened').value;
-  const indomitable = +document.getElementById('indomitable').value;
-  const bastion = +document.getElementById('bastion').value;
+ const hardened = numericDefenderRules['hardened'] || 0;
+const indomitable = numericDefenderRules['indomitable'] || 0;
+const bastion = numericDefenderRules['bastion'] || 0;
+const tenacious = numericDefenderRules['tenacious'] || 0;
 
-  const flankRear = document.getElementById('flankRear').checked;
-  const ignoreResolve = document.getElementById('ignoreResolve').checked;
-  const oblivious = document.getElementById('oblivious').checked;
-  const shield = document.getElementById('shield').checked;
-  const parry = document.getElementById('parry').checked;
-  const phalanx = document.getElementById('phalanx').checked;
-  const duelDeclined = document.getElementById('duelDeclined').checked;
-  const blessedUsage = document.getElementById('defenderBlessed').value;
-  const braveryType = document.getElementById('bravery').value;
-  const ignoreTerrifying = braveryType === 'bravery' || braveryType === 'fearless';
-  const tenacious = +document.getElementById('tenacious').value;
-  const untouchable = document.getElementById('untouchable')?.checked || false;
+const flankRear = isDefenderRuleActive('flankRear');
+const ignoreResolve = isDefenderRuleActive('ignoreResolve');
+const oblivious = isDefenderRuleActive('oblivious');
+const shield = isDefenderRuleActive('shield');
+const parry = isDefenderRuleActive('parry');
+const phalanx = isDefenderRuleActive('phalanx');
+const duelDeclined = isDefenderRuleActive('duelDeclined');
+const untouchable = isDefenderRuleActive('untouchable');
+const blessedUsage = isDefenderRuleActive('blessed') ? document.getElementById('defenderBlessed').value : 'none';
+const braveryType = isDefenderRuleActive('bravery') ? 'bravery' : isDefenderRuleActive('fearless') ? 'fearless' : 'none';
+const ignoreTerrifying = braveryType === 'bravery' || braveryType === 'fearless';
+
 
   
   
@@ -383,7 +502,7 @@ const terrifying = numericAttackerRules['terrifyingBonus'] || 0;
   }
 
   // === IMPACT ATTACKS berechnen ===
-  const totalImpact = models * impact;
+  const totalImpact = models * impactBonus;
   let clashImpact = clash;
   if (gloriousCharge) clashImpact += 1;
   if (shock) clashImpact += 1;
@@ -595,41 +714,55 @@ function runMonteCarloSimulation() {
   const iterations = 10000;
   const results = [];
 
-  // Eingaben lesen
+  // Eingaben lesen Attacker
   const models = +document.getElementById('models').value;
   const attacks = +document.getElementById('attacks').value;
-  const impact = +document.getElementById('impact').value;
   const clash = +document.getElementById('cllash').value;
-  const defense = +document.getElementById('defense').value;
-  const evasion = +document.getElementById('evasion').value;
-  const resolve = +document.getElementById('resolve').value;
-  const hardened = +document.getElementById('hardened').value;
-  const tenacious = +document.getElementById('tenacious')?.value || 0;
-  const indomitable = +document.getElementById('indomitable')?.value || 0;
-  const shield = document.getElementById('shield')?.checked || false;
-  const flankRear = document.getElementById('flankRear').checked;
-  const inspired = document.getElementById('inspired').checked;
-  const leader = document.getElementById('leader').checked;
-  const support = +document.getElementById('support').value;
-  const untouchable = document.getElementById('untouchable')?.checked || false;
-  const flurry = isRuleActive('flurry');
-  const relentless = isRuleActive('relentless');
-  const smite = isRuleActive('smite');
-  const shock = isRuleActive('shock');
-  const deadlyBlades = isRuleActive('deadlyBlades');
-  const gloriousCharge = isRuleActive('gloriousCharge');
-  const linebreaker = isRuleActive('linebreaker');
-  const flawless = isRuleActive('flawless');
-  const attackerBlessed = isRuleActive('blessed');
-  const opportunists = isRuleActive('opportunists');
-  const oblivious = document.getElementById('oblivious')?.checked || false;
+const inspired = document.getElementById('inspired').checked;
+const leader = document.getElementById('leader').checked;
+const support = +document.getElementById('support').value; 
+const flurry = isRuleActive('flurry');
+const relentless = isRuleActive('relentless');
+const smite = isRuleActive('smite');
+const shock = isRuleActive('shock');
+const deadlyBlades = isRuleActive('deadlyBlades');
+const gloriousCharge = isRuleActive('gloriousCharge');
+const linebreaker = isRuleActive('linebreaker');
+const flawless = isRuleActive('flawless');
+const attackerBlessed = isRuleActive('blessed');
+const opportunists = isRuleActive('opportunists');
 const cleave = numericAttackerRules['cleaveBonus'] || 0;
 const brutalImpact = numericAttackerRules['brutalImpactBonus'] || 0;
 const trample = numericAttackerRules['trampleBonus'] || 0;
 const terrifying = numericAttackerRules['terrifyingBonus'] || 0;
+const impactBonus = numericAttackerRules['impactBonus'] || 0;
+const attackerBlessedUsage = document.getElementById('attackerBlessedUsage').value;
 
-  const attackerBlessedUsage = document.getElementById('attackerBlessedUsage').value;
-  const parry = document.getElementById('parry')?.checked || false;
+// Eingaben lesen Defender
+const defense = +document.getElementById('defense').value;
+  const evasion = +document.getElementById('evasion').value;
+  const resolve = +document.getElementById('resolve').value;
+  const hardened = numericDefenderRules['hardened'] || 0;
+const indomitable = numericDefenderRules['indomitable'] || 0;
+const bastion = numericDefenderRules['bastion'] || 0;
+const tenacious = numericDefenderRules['tenacious'] || 0;
+
+const flankRear = isDefenderRuleActive('flankRear');
+const ignoreResolve = isDefenderRuleActive('ignoreResolve');
+const oblivious = isDefenderRuleActive('oblivious');
+const shield = isDefenderRuleActive('shield');
+const parry = isDefenderRuleActive('parry');
+const phalanx = isDefenderRuleActive('phalanx');
+const duelDeclined = isDefenderRuleActive('duelDeclined');
+const untouchable = isDefenderRuleActive('untouchable');
+const blessedUsage = isDefenderRuleActive('blessed') ? document.getElementById('defenderBlessed').value : 'none';
+const braveryType = isDefenderRuleActive('bravery') ? 'bravery' : isDefenderRuleActive('fearless') ? 'fearless' : 'none';
+const ignoreTerrifying = braveryType === 'bravery' || braveryType === 'fearless';
+
+
+
+
+
 
   const inspiredClash = inspired ? Math.min(clash + 1, 4) : clash;
   const clashImpact = shock ? inspiredClash + 1 : inspiredClash;
@@ -667,13 +800,22 @@ const terrifying = numericAttackerRules['terrifyingBonus'] || 0;
     for (let j = 0; j < regularHits; j++) {
       let saveRoll = Math.ceil(Math.random() * 6);
       if (saveRoll > saveTarget) {
-        if (untouchable && saveRoll === 6) {
-          const reroll = Math.ceil(Math.random() * 6);
-          if (reroll > saveTarget) failedSaves++;
-        } else {
-          failedSaves++;
-        }
-      }
+  let fail = true;
+
+  if (untouchable && saveRoll === 6) {
+    const reroll = Math.ceil(Math.random() * 6);
+    fail = reroll > saveTarget;
+  }
+
+ if (fail && blessedUsage === 'normal') {
+    const blessedReroll = Math.ceil(Math.random() * 6);
+    fail = blessedReroll > saveTarget;
+  }
+
+  if (fail) failedSaves++;
+}
+
+
     }
 
     const tenaciousNormal = Math.min(failedSaves, tenacious);
@@ -702,7 +844,7 @@ const terrifying = numericAttackerRules['terrifyingBonus'] || 0;
     failedFlawless -= tenaciousFlawless;
 
     // === Impact ===
-    const totalImpact = models * impact;
+    const totalImpact = models * impactBonus;
     let impactHits = 0;
     for (let j = 0; j < totalImpact; j++) {
       let roll = Math.ceil(Math.random() * 6);
@@ -722,13 +864,20 @@ const terrifying = numericAttackerRules['terrifyingBonus'] || 0;
     for (let j = 0; j < impactHits; j++) {
       const roll = Math.ceil(Math.random() * 6);
       if (roll > saveImpactTarget) {
-        if (untouchable && roll === 6) {
-          const reroll = Math.ceil(Math.random() * 6);
-          if (reroll > saveImpactTarget) failedImpact++;
-        } else {
-          failedImpact++;
-        }
-      }
+  let fail = true;
+
+  if (untouchable && roll === 6) {
+    const reroll = Math.ceil(Math.random() * 6);
+    fail = reroll > saveImpactTarget;
+  }
+
+  if (fail && blessedUsage === 'impact') {
+    const blessedReroll = Math.ceil(Math.random() * 6);
+    fail = blessedReroll > saveImpactTarget;
+  }
+
+  if (fail) failedImpact++;
+}
     }
 
     const tenaciousImpact = Math.min(failedImpact, tenacious);
@@ -770,8 +919,16 @@ const resolveTarget = Math.min(resolveAfterTerrifying, 5);
     let failedResolve = 0;
 
     for (let j = 0; j < (failedSaves + failedFlawless + failedImpact); j++) {
-      if (Math.ceil(Math.random() * 6) > resolveTarget) failedResolve++;
+  let roll = Math.ceil(Math.random() * 6);
+  if (roll > resolveTarget) {
+    if (duelDeclined && roll === 1) {
+      const reroll = Math.ceil(Math.random() * 6);
+      if (reroll > resolveTarget) failedResolve++;
+    } else {
+      failedResolve++;
     }
+  }
+}
 
     failedResolve = Math.max(0, failedResolve - indomitable);
     const resolveWounds = oblivious ? Math.ceil(failedResolve / 2) : failedResolve;
