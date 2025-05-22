@@ -3,60 +3,95 @@
 <head>
   <title>Conquest Damage Calculator</title>
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 30px auto;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .container {
-      display: flex;
-      flex-direction: column;
-      gap: 30px;
-      max-width: 1200px;
-      width: 100%;
-    }
-    .section {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 20px;
-    }
-    .section-title {
-      width: 100%;
-      font-weight: bold;
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-    .input-group {
-      flex: 1 1 300px;
-      display: flex;
-      flex-direction: column;
-    }
-    label {
-      margin-top: 10px;
-    }
-    input, select, button {
-      padding: 8px;
-      margin-top: 5px;
-    }
-    .result {
-      margin-top: 30px;
-      font-weight: bold;
-      white-space: pre-line;
-      max-width: 1000px;
-      width: 100%;
-    }
-  </style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #121212;
+    color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    max-width: 1200px;
+    margin: auto;
+    padding-bottom: 50px;
+  }
+
+  .section {
+    border-radius: 12px;
+    padding: 20px;
+    background-color: #1e1e1e;
+  }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .input-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .input-group label {
+    flex: 1 1 300px;
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+  }
+
+  input, select, button {
+    padding: 8px;
+    margin-top: 5px;
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #555;
+    border-radius: 6px;
+  }
+
+  input:focus, select:focus, button:focus {
+    outline: none;
+    border-color: #888;
+  }
+
+  .attacker {
+    border-left: 4px solid #3a9bff;
+  }
+
+  .defender {
+    border-left: 4px solid #e45757;
+  }
+
+  button {
+    background-color: #3a9bff;
+    border: none;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #2e7ccc;
+  }
+
+  .result {
+    white-space: pre-line;
+    background-color: #1b1b1b;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #4caf50;
+    font-family: monospace;
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <h1>Conquest Damage Calculator</h1>
   <div class="container">
-    <div class="section">
+    <div class="section attacker">
       <div class="section-title">Your Unit</div>
       <div class="input-group">
         <label>Total Stands:</label>
@@ -84,28 +119,45 @@
         <!-- Angreifer-Regeln -->
         <label><input type="checkbox" id="leader" checked> Add Leader (1 extra attack)</label>
         <label><input type="checkbox" id="inspired"> Inspired (Clash +1, max 4)</label>
-        <label><input type="checkbox" id="attackerBlessed"> Blessed (reroll all hit rolls)</label>
-        <label>Attacker Blessed Usage:</label>
-        <select id="attackerBlessedUsage">
-          <option value="none">None</option>
-          <option value="normal">Normal Attack</option>
-          <option value="impact">Impact Attack</option>
-        </select>
-        <label><input type="checkbox" id="flurry"> Flurry (reroll all hit rolls)</label>
-        <label><input type="checkbox" id="opportunists"> Opportunists (reroll all hit rolls if Flank/Rear)</label>
-        <label><input type="checkbox" id="flawless"> Flawless Strikes (Rolls of 1 ignore defense)</label>
-        <label><input type="checkbox" id="deadlyBlades"> Deadly Blades (Defense rolls of 6 cause 2 wounds + 2 resolve checks)</label>
-        <label><input type="checkbox" id="gloriousCharge"> Glorious Charge (+1 Clash & Terrifying 1 for Impact Attacks)</label>
-        <label><input type="checkbox" id="linebreaker"> Linebreaker (Ignores Shield and Bastion)</label>
-		<label><input type="checkbox" id="relentless"> Relentless Blows (Hit rolls of 1 cause an additional hit)</label>
-		<label><input type="checkbox" id="shock"> Shock (+1 Clash for Impact hits)</label>
-		<label><input type="checkbox" id="smite"> Smite (Normal attacks ignore Defense, but not Evasion)</label>
+        <!-- Rule Selection -->
+<div>
+  <label for="attackerSpecialRules">Add Special Rule:</label>
+  <select id="attackerSpecialRules">
+    <option value="">-- Select --</option>
+    <option value="flurry">Flurry</option>
+    <option value="relentless">Relentless Blows</option>
+    <option value="smite">Smite</option>
+    <option value="shock">Shock</option>
+    <option value="deadlyBlades">Deadly Blades</option>
+    <option value="gloriousCharge">Glorious Charge</option>
+    <option value="linebreaker">Linebreaker</option>
+    <option value="flawless">Flawless Strikes</option>
+    <option value="blessed">Blessed</option>
+    <option value="opportunists">Opportunists</option>
+  </select>
+  <button type="button" onclick="addAttackerRule()">Add</button>
+</div>
+
+<!-- Selected Rules Display -->
+<ul id="attackerRulesList" style="margin-top: 10px; list-style: none; padding: 0;"></ul>
+
+<!-- Blessed Usage Dropdown (hidden by default) -->
+<div id="blessedUsageContainer" style="display: none; margin-top: 10px;">
+  <label for="attackerBlessedUsage">Blessed Usage:</label>
+  <select id="attackerBlessedUsage">
+    <option value="none">None</option>
+    <option value="normal">Normal Attack</option>
+    <option value="impact">Impact Attack</option>
+  </select>
+</div>
+
+<ul id="attackerRulesList" style="margin-top: 10px;"></ul>
 
 
       </div>
     </div>
 
-    <div class="section">
+    <div class="section defender">
       <div class="section-title">Opponent Unit</div>
       <div class="input-group">
         <label>Total Stands (Defender):</label>
@@ -156,8 +208,53 @@
     </div>
 
     <div class="result" id="result"></div>
+	<canvas id="woundChart" style="max-width: 1000px; margin-top: 30px;"></canvas>
   </div>
 <script>
+const activeAttackerRules = new Set();
+
+function addAttackerRule() {
+  const select = document.getElementById("attackerSpecialRules");
+  const value = select.value;
+  const text = select.options[select.selectedIndex].text;
+
+  if (!value || activeAttackerRules.has(value)) return;
+
+  activeAttackerRules.add(value);
+
+  if (value === "blessed") {
+    document.getElementById("blessedUsageContainer").style.display = "block";
+  }
+
+  const list = document.getElementById("attackerRulesList");
+  const li = document.createElement("li");
+  li.id = "rule_" + value;
+  li.style.marginBottom = "5px";
+
+  const label = document.createElement("span");
+  label.textContent = text + " ";
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "❌";
+  removeBtn.style.marginLeft = "10px";
+  removeBtn.onclick = () => {
+    activeAttackerRules.delete(value);
+    document.getElementById("rule_" + value).remove();
+    if (value === "blessed") {
+      document.getElementById("blessedUsageContainer").style.display = "none";
+    }
+  };
+
+  li.appendChild(label);
+  li.appendChild(removeBtn);
+  list.appendChild(li);
+  select.value = "";
+}
+
+function isRuleActive(ruleId) {
+  return activeAttackerRules.has(ruleId);
+}
+
 function calculateDamage() {
 const useSimulation = document.getElementById('useSimulation').checked;
   if (useSimulation) {
@@ -173,23 +270,27 @@ const useSimulation = document.getElementById('useSimulation').checked;
   const cleave = +document.getElementById('cleave').value;
   const brutalImpact = +document.getElementById('brutalImpact').value;
   const trample = +document.getElementById('trample').value;
-  const shock = document.getElementById('shock').checked;
-  const smite = document.getElementById('smite').checked;
   const leader = document.getElementById('leader').checked;
   const inspired = document.getElementById('inspired').checked;
-  const attackerBlessed = document.getElementById('attackerBlessed').checked;
+const flurry = isRuleActive('flurry');
+const relentless = isRuleActive('relentless');
+const smite = isRuleActive('smite');
+const shock = isRuleActive('shock');
+const deadlyBlades = isRuleActive('deadlyBlades');
+const gloriousCharge = isRuleActive('gloriousCharge');
+const linebreaker = isRuleActive('linebreaker');
+const flawless = isRuleActive('flawless');
+const attackerBlessed = isRuleActive('blessed');
+const opportunists = isRuleActive('opportunists');
+
+
+  
   const attackerBlessedUsage = document.getElementById('attackerBlessedUsage').value;
-  const flurry = document.getElementById('flurry').checked;
-  const opportunists = document.getElementById('opportunists').checked;
-  const flawless = document.getElementById('flawless').checked;
-  const deadlyBlades = document.getElementById('deadlyBlades').checked;
-  const gloriousCharge = document.getElementById('gloriousCharge').checked;
-  const linebreaker = document.getElementById('linebreaker').checked;
+
 
   const support = +document.getElementById('support').value;
   const standsInContact = Math.min(models, +document.getElementById('standsInContact').value);
   const nonContactStands = models - standsInContact;
-  const relentless = document.getElementById('relentless').checked;
 
 
   // === INPUTS: Verteidiger ===
@@ -296,6 +397,7 @@ const useSimulation = document.getElementById('useSimulation').checked;
   const resolveVal = Math.max(1, effectiveResolve - (ignoreTerrifying ? 0 : totalTerrifying));
   let resolveChance = ignoreResolve ? 1 : Math.min(resolveVal, 5) / 6;
   if (duelDeclined && !ignoreResolve) resolveChance -= (1 / 6) * (1 / 6);
+  
 
   // === Flawless Strikes ===
   const flawlessHits = flawless ? totalAttacks * (1 / 6) : 0;
@@ -360,9 +462,9 @@ if (untouchable) {
   // === TRAMPLE ===
   const trampleHits = models * trample;
   let trampleWounds = trampleHits * (1 - saveChanceTrample);
-  if (untouchable) {
-  const rerollable = failedImpactSaves * (1 / 6);
-  failedImpactSaves -= rerollable * saveChanceImpact;
+if (untouchable) {
+  const rerollable = trampleWounds * (1 / 6);
+  trampleWounds -= rerollable * saveChanceTrample;
 }
   const tenaciousTrample = Math.min(trampleWounds, tenacious);
   trampleWounds -= tenaciousTrample;
@@ -414,6 +516,55 @@ if (untouchable) {
 
   // Ausgabe setzen
   document.getElementById('result').innerText = resultText;
+  // Chart erzeugen
+const ctx = document.getElementById('woundChart').getContext('2d');
+
+// Häufigkeiten berechnen
+const woundCounts = {};
+results.forEach(w => {
+  woundCounts[w] = (woundCounts[w] || 0) + 1;
+});
+
+const sortedKeys = Object.keys(woundCounts).map(Number).sort((a, b) => a - b);
+const frequencies = sortedKeys.map(k => woundCounts[k]);
+
+// Falls ein alter Chart existiert → zerstören
+if (window.woundChartInstance) {
+  window.woundChartInstance.destroy();
+}
+
+// Neuen Chart erzeugen
+window.woundChartInstance = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: sortedKeys,
+    datasets: [{
+      label: 'Wound Frequency',
+      data: frequencies,
+      backgroundColor: '#4caf50'
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: 'Wound Distribution (10,000 rolls)'
+      }
+    },
+    scales: {
+      x: {
+        title: { display: true, text: 'Wounds' }
+      },
+      y: {
+        title: { display: true, text: 'Frequency' },
+        beginAtZero: true
+      }
+    }
+  }
+});
+
 }
 function runMonteCarloSimulation() {
   const iterations = 10000;
@@ -434,23 +585,24 @@ function runMonteCarloSimulation() {
   const indomitable = +document.getElementById('indomitable')?.value || 0;
   const trample = +document.getElementById('trample').value;
   const shield = document.getElementById('shield')?.checked || false;
-  const shock = document.getElementById('shock')?.checked || false;
-  const smite = document.getElementById('smite')?.checked || false;
-  const relentless = document.getElementById('relentless')?.checked || false;
-  const deadlyBlades = document.getElementById('deadlyBlades')?.checked || false;
-  const flawless = document.getElementById('flawless')?.checked || false;
-  const gloriousCharge = document.getElementById('gloriousCharge')?.checked || false;
   const flankRear = document.getElementById('flankRear').checked;
   const inspired = document.getElementById('inspired').checked;
   const leader = document.getElementById('leader').checked;
   const support = +document.getElementById('support').value;
   const untouchable = document.getElementById('untouchable')?.checked || false;
+  const flurry = isRuleActive('flurry');
+  const relentless = isRuleActive('relentless');
+  const smite = isRuleActive('smite');
+  const shock = isRuleActive('shock');
+  const deadlyBlades = isRuleActive('deadlyBlades');
+  const gloriousCharge = isRuleActive('gloriousCharge');
+  const linebreaker = isRuleActive('linebreaker');
+  const flawless = isRuleActive('flawless');
+  const attackerBlessed = isRuleActive('blessed');
+  const opportunists = isRuleActive('opportunists');
+  const oblivious = document.getElementById('oblivious')?.checked || false;
 
-
-  const attackerBlessed = document.getElementById('attackerBlessed').checked;
   const attackerBlessedUsage = document.getElementById('attackerBlessedUsage').value;
-  const flurry = document.getElementById('flurry').checked;
-  const opportunists = document.getElementById('opportunists').checked;
   const parry = document.getElementById('parry')?.checked || false;
 
   const inspiredClash = inspired ? Math.min(clash + 1, 4) : clash;
@@ -461,9 +613,9 @@ function runMonteCarloSimulation() {
   const totalAttacks = attacks > 0 ? standsInContact * attacks + nonContactStands * support + (leader ? 1 : 0) : 0;
 
   for (let i = 0; i < iterations; i++) {
-    let wounds = 0;
+    let simWounds = 0;
 
-    // === Normale Angriffe ===
+    // Beispielhafte Angriffssimulation (normale Treffer)
     let hits = 0;
     for (let j = 0; j < totalAttacks; j++) {
       let roll = Math.ceil(Math.random() * 6);
@@ -481,46 +633,44 @@ function runMonteCarloSimulation() {
       }
     }
 
-    let flawlessHits = flawless ? Math.floor(hits * (1 / 6)) : 0;
-    let regularHits = hits - flawlessHits;
+    const flawlessHits = flawless ? Math.floor(hits * (1 / 6)) : 0;
+    const regularHits = hits - flawlessHits;
 
-    let saveNormalTarget = Math.max((smite ? 0 : defense) - cleave - hardened, evasion);
+    let saveTarget = Math.max((smite ? 0 : defense) - cleave - hardened, evasion);
     let failedSaves = 0;
     for (let j = 0; j < regularHits; j++) {
-      const saveRoll = Math.ceil(Math.random() * 6);
-      if (saveRoll > saveNormalTarget) {
-  if (untouchable && saveRoll === 6) {
-    const reroll = Math.ceil(Math.random() * 6);
-    if (reroll > saveNormalTarget) failedSaves++;
-  } else {
-    failedSaves++;
-  }
-}
+      let saveRoll = Math.ceil(Math.random() * 6);
+      if (saveRoll > saveTarget) {
+        if (untouchable && saveRoll === 6) {
+          const reroll = Math.ceil(Math.random() * 6);
+          if (reroll > saveTarget) failedSaves++;
+        } else {
+          failedSaves++;
+        }
+      }
     }
 
     const tenaciousNormal = Math.min(failedSaves, tenacious);
     failedSaves -= tenaciousNormal;
 
-    // Deadly Blades
     if (deadlyBlades) {
       const deadly = Math.floor(failedSaves * (1 / 6));
-      failedSaves += deadly; // jede 6 zählt als 2 Wunden
+      failedSaves += deadly;
     }
 
     let saveFlawlessTarget = Math.max(evasion - hardened, 0);
-let failedFlawless = 0;
+    let failedFlawless = 0;
+    for (let j = 0; j < flawlessHits; j++) {
+      let roll = Math.ceil(Math.random() * 6);
+      let fail = roll > saveFlawlessTarget;
 
-for (let j = 0; j < flawlessHits; j++) {
-  let roll = Math.ceil(Math.random() * 6);
-  let fail = roll > saveFlawlessTarget;
+      if (fail && untouchable && roll === 6) {
+        const reroll = Math.ceil(Math.random() * 6);
+        fail = reroll > saveFlawlessTarget;
+      }
 
-  if (fail && untouchable && roll === 6) {
-    const reroll = Math.ceil(Math.random() * 6);
-    fail = reroll > saveFlawlessTarget;
-  }
-
-  if (fail) failedFlawless++;
-}
+      if (fail) failedFlawless++;
+    }
 
     const tenaciousFlawless = Math.min(failedFlawless, tenacious);
     failedFlawless -= tenaciousFlawless;
@@ -544,15 +694,15 @@ for (let j = 0; j < flawlessHits; j++) {
     let saveImpactTarget = Math.max(defense - brutalImpact - hardened, evasion);
     let failedImpact = 0;
     for (let j = 0; j < impactHits; j++) {
-     const roll = Math.ceil(Math.random() * 6);
-if (roll > saveImpactTarget) {
-  if (untouchable && roll === 6) {
-    const reroll = Math.ceil(Math.random() * 6);
-    if (reroll > saveImpactTarget) failedImpact++;
-  } else {
-    failedImpact++;
-  }
-}
+      const roll = Math.ceil(Math.random() * 6);
+      if (roll > saveImpactTarget) {
+        if (untouchable && roll === 6) {
+          const reroll = Math.ceil(Math.random() * 6);
+          if (reroll > saveImpactTarget) failedImpact++;
+        } else {
+          failedImpact++;
+        }
+      }
     }
 
     const tenaciousImpact = Math.min(failedImpact, tenacious);
@@ -564,32 +714,33 @@ if (roll > saveImpactTarget) {
     let failedTrample = 0;
     for (let j = 0; j < trampleHits; j++) {
       const roll = Math.ceil(Math.random() * 6);
-if (roll > saveTrampleTarget) {
-  if (untouchable && roll === 6) {
-    const reroll = Math.ceil(Math.random() * 6);
-    if (reroll > saveTrampleTarget) failedTrample++;
-  } else {
-    failedTrample++;
-  }
-}
+      if (roll > saveTrampleTarget) {
+        if (untouchable && roll === 6) {
+          const reroll = Math.ceil(Math.random() * 6);
+          if (reroll > saveTrampleTarget) failedTrample++;
+        } else {
+          failedTrample++;
+        }
+      }
     }
 
     const tenaciousTrample = Math.min(failedTrample, tenacious);
     failedTrample -= tenaciousTrample;
 
-    // === Resolve-Würfe ===
+    // === Resolve ===
     const resolveTarget = Math.min(resolve, 5);
-    const totalFails = failedSaves + failedFlawless + failedImpact;
     let failedResolve = 0;
-    for (let j = 0; j < totalFails; j++) {
+
+    for (let j = 0; j < (failedSaves + failedFlawless + failedImpact); j++) {
       if (Math.ceil(Math.random() * 6) > resolveTarget) failedResolve++;
     }
 
     failedResolve = Math.max(0, failedResolve - indomitable);
+    const resolveWounds = oblivious ? Math.ceil(failedResolve / 2) : failedResolve;
 
-    // === Gesamtschaden ===
-    wounds = failedSaves + failedFlawless + failedImpact + failedTrample + failedResolve;
-    results.push(wounds);
+    // === Total ===
+    simWounds = failedSaves + failedFlawless + failedImpact + failedTrample + resolveWounds;
+    results.push(simWounds);
   }
 
   results.sort((a, b) => a - b);
@@ -605,7 +756,57 @@ if (roll > saveTrampleTarget) {
     `Mode (most frequent): ${mode}`;
 
   document.getElementById('result').innerText = resultText;
+  // Chart erzeugen
+const ctx = document.getElementById('woundChart').getContext('2d');
+
+// Häufigkeiten berechnen
+const woundCounts = {};
+results.forEach(w => {
+  woundCounts[w] = (woundCounts[w] || 0) + 1;
+});
+
+const sortedKeys = Object.keys(woundCounts).map(Number).sort((a, b) => a - b);
+const frequencies = sortedKeys.map(k => woundCounts[k]);
+
+// Falls ein alter Chart existiert → zerstören
+if (window.woundChartInstance) {
+  window.woundChartInstance.destroy();
 }
+
+// Neuen Chart erzeugen
+window.woundChartInstance = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: sortedKeys,
+    datasets: [{
+      label: 'Wound Frequency',
+      data: frequencies,
+      backgroundColor: '#4caf50'
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: 'Wound Distribution (10,000 rolls)'
+      }
+    },
+    scales: {
+      x: {
+        title: { display: true, text: 'Wounds' }
+      },
+      y: {
+        title: { display: true, text: 'Frequency' },
+        beginAtZero: true
+      }
+    }
+  }
+});
+
+}
+
 
 </script>
 </body>
