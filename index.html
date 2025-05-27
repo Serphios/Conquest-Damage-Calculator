@@ -1035,5 +1035,41 @@ window.woundChartInstance = new Chart(ctx, {
 
 
 </script>
+<!-- Button zum Öffnen des Impressums -->
+<button onclick="openImpressum()" style="margin-top:40px; background-color:#2e7ccc; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
+  Impressum
+</button>
+
+<!-- Impressum-Popup (versteckt) -->
+<div id="impressumModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.8); z-index:9999;">
+  <div style="background-color:#1e1e1e; color:#f0f0f0; padding:30px; max-width:600px; margin:100px auto; border-radius:12px; position:relative;">
+    <h2 style="font-size:18px; font-weight:bold; margin-bottom:10px;">Impressum</h2>
+    <p>
+      Angaben gemäß § 5 TMG:<br><br>
+      Daniel Suhr, HF<br>
+	  ZAW BetrSt Augustdorf<br>
+      Genral Feldmarschall Rommel Kaserne<br>
+	  Von Boselager Straße 212 <br>
+      32832 Augustdorf<br>
+      Deutschland
+    </p>
+    <p>
+      <strong>Kontakt:</strong><br>
+      E-Mail: <a href="mailto:daniel.suhr@web.de" style="color:#3a9bff;">daniel.suhr@web.de</a>
+    </p>
+    <p style="margin-top:20px; font-size:14px; color:#cccccc;">
+      Dies ist ein nicht-kommerzielles Fanprojekt ohne kommerzielle Absichten. Es besteht keine Verbindung zu Para Bellum Wargames oder anderen Rechteinhabern. Alle genannten Marken und Inhalte gehören ihren jeweiligen Eigentümern.
+    </p>
+    <button onclick="closeImpressum()" style="position:absolute; top:10px; right:10px; background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">✖</button>
+  </div>
+</div>
+<script>
+  function openImpressum() {
+    document.getElementById("impressumModal").style.display = "block";
+  }
+  function closeImpressum() {
+    document.getElementById("impressumModal").style.display = "none";
+  }
+</script>
 </body>
 </html>
