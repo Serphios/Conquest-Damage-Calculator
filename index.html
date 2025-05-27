@@ -136,21 +136,27 @@
   <label for="attackerSpecialRules">Add Special Rule:</label>
   <select id="attackerSpecialRules">
     <option value="">-- Select --</option>
-    <option value="flurry">Flurry</option>
-    <option value="relentless">Relentless Blows</option>
-    <option value="smite">Smite</option>
-    <option value="shock">Shock</option>
-    <option value="deadlyBlades">Deadly Blades</option>
-    <option value="gloriousCharge">Glorious Charge</option>
-    <option value="linebreaker">Linebreaker</option>
-    <option value="flawless">Flawless Strikes</option>
-    <option value="blessed">Blessed</option>
-    <option value="opportunists">Opportunists</option>
-	<option value="cleaveBonus" data-type="numeric">Cleave</option>
-	<option value="brutalImpactBonus" data-type="numeric">Brutal Impact</option>
-	<option value="trampleBonus" data-type="numeric">Trample</option>
-	<option value="terrifyingBonus" data-type="numeric">Terrifying</option>
-	<option value="impactBonus" data-type="numeric">Impact Attacks</option>
+
+<optgroup label="— Numeric Special Rules —">
+  <option value="brutalImpactBonus" data-type="numeric">Brutal Impact</option>
+  <option value="cleaveBonus" data-type="numeric">Cleave</option>
+  <option value="impactBonus" data-type="numeric">Impact Attacks</option>
+  <option value="terrifyingBonus" data-type="numeric">Terrifying</option>
+  <option value="trampleBonus" data-type="numeric">Trample</option>
+</optgroup>
+
+<optgroup label="— Toggle Special Rules —">
+  <option value="blessed">Blessed</option>
+  <option value="deadlyBlades">Deadly Blades</option>
+  <option value="flawless">Flawless Strikes</option>
+  <option value="flurry">Flurry</option>
+  <option value="gloriousCharge">Glorious Charge</option>
+  <option value="linebreaker">Linebreaker</option>
+  <option value="opportunists">Opportunists</option>
+  <option value="relentless">Relentless Blows</option>
+  <option value="shock">Shock</option>
+  <option value="smite">Smite</option>
+</optgroup>
   </select>
   <button type="button" onclick="addAttackerRule()">Add</button>
 </div>
@@ -180,32 +186,38 @@
         <label>Total Stands (Defender):</label>
         <input type="number" id="defenderStands" value="3">
         <label>Defense Value:</label>
-        <input type="number" id="defense" value="2">
+        <input type="number" id="defense" value="3">
         <label>Evasion Value:</label>
-        <input type="number" id="evasion" value="0">
+        <input type="number" id="evasion" value="1">
         <label>Resolve Value:</label>
-        <input type="number" id="resolve" value="2">
+        <input type="number" id="resolve" value="3">
 
 		<!-- Defender Special Rules -->
 <div>
   <label for="defenderSpecialRules">Add Special Rule:</label>
   <select id="defenderSpecialRules">
     <option value="">-- Select --</option>
-    <option value="hardened" data-type="numeric">Hardened</option>
-    <option value="indomitable" data-type="numeric">Indomitable</option>
-    <option value="bastion" data-type="numeric">Bastion</option>
-    <option value="tenacious" data-type="numeric">Tenacious</option>
-    <option value="flankRear">Flank or Rear Attack</option>
-    <option value="ignoreResolve">Ignore Resolve</option>
-    <option value="oblivious">Oblivious</option>
-    <option value="shield">Shield</option>
-    <option value="parry">Parry</option>
-    <option value="phalanx">Phalanx</option>
-    <option value="duelDeclined">Duel Declined</option>
-    <option value="untouchable">Untouchable</option>
-    <option value="blessed">Blessed</option>
-    <option value="bravery">Bravery</option>
-    <option value="fearless">Fearless</option>
+
+<optgroup label="— Numeric Special Rules —">
+  <option value="bastion" data-type="numeric">Bastion</option>
+  <option value="hardened" data-type="numeric">Hardened</option>
+  <option value="indomitable" data-type="numeric">Indomitable</option>
+  <option value="tenacious" data-type="numeric">Tenacious</option>
+</optgroup>
+
+<optgroup label="— Toggle Special Rules —">
+  <option value="blessed">Blessed</option>
+  <option value="bravery">Bravery</option>
+  <option value="duelDeclined">Duel Declined</option>
+  <option value="fearless">Fearless</option>
+  <option value="flankRear">Flank or Rear Attack</option>
+  <option value="ignoreResolve">Ignore Resolve</option>
+  <option value="oblivious">Oblivious</option>
+  <option value="parry">Parry</option>
+  <option value="phalanx">Phalanx</option>
+  <option value="shield">Shield</option>
+  <option value="untouchable">Untouchable</option>
+</optgroup>
   </select>
   <button type="button" onclick="addDefenderRule()">Add</button>
 </div>
