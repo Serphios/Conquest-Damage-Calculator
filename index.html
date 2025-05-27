@@ -811,7 +811,7 @@ const ignoreTerrifying = braveryType === 'bravery' || braveryType === 'fearless'
 
 
 
-
+const rerollSixes = inspired && clash + 1 > 4;
 
 
   const inspiredClash = inspired ? Math.min(clash + 1, 4) : clash;
@@ -827,8 +827,13 @@ const ignoreTerrifying = braveryType === 'bravery' || braveryType === 'fearless'
     // Beispielhafte Angriffssimulation (normale Treffer)
     let hits = 0;
     for (let j = 0; j < totalAttacks; j++) {
-      let roll = Math.ceil(Math.random() * 6);
-      let hit = roll <= inspiredClash;
+     let roll = Math.ceil(Math.random() * 6);
+let hit = roll <= inspiredClash;
+
+if (!hit && rerollSixes && roll === 6) {
+  const reroll = Math.ceil(Math.random() * 6);
+  hit = reroll <= inspiredClash;
+}
 
       if (!hit && !parry && (
         (attackerBlessed && attackerBlessedUsage === 'normal') || flurry || (opportunists && flankRear))) {
@@ -849,6 +854,11 @@ let regularHits = 0;
 for (let j = 0; j < totalAttacks; j++) {
   let roll = Math.ceil(Math.random() * 6);
   let hit = roll <= inspiredClash;
+
+  if (!hit && rerollSixes && roll === 6) {
+    const reroll = Math.ceil(Math.random() * 6);
+    hit = reroll <= inspiredClash;
+  }
 
   if (!hit && !parry && (
     (attackerBlessed && attackerBlessedUsage === 'normal') || flurry || (opportunists && flankRear))) {
