@@ -97,22 +97,35 @@
     <div class="section attacker">
       <div class="section-title">Your Unit</div>
       <div class="input-group">
-        <label>Total Stands:</label>
-        <input type="number" id="models" value="3">
-        <label>Stands in Contact:</label>
-        <input type="number" id="standsInContact" value="3">
-        <label>Support (for non-contact stands):</label>
-        <input type="number" id="support" value="1">
-        <label>Attacks per Stand:</label>
-        <input type="number" id="attacks" value="4">
-        <label>Clash Value:</label>
-        <input type="number" id="cllash" value="3">
-        
-		
+  <label>Total Stands:</label>
+  <input type="number" id="models" value="3">
+  <label>Stands in Contact:</label>
+  <input type="number" id="standsInContact" value="3">
+  <label>Support (for non-contact stands):</label>
+  <input type="number" id="support" value="1">
+  <label>Attacks per Stand:</label>
+  <input type="number" id="attacks" value="4">
+  <label>Clash Value:</label>
+  <input type="number" id="cllash" value="3">
+  <label></label>
+  <input type="number" id="hiddenNumber" value="5" style="visibility: hidden;">
+</div>
 
-        <!-- Angreifer-Regeln -->
-        <label><input type="checkbox" id="leader" checked> Add Leader (1 extra attack)</label>
-        <label><input type="checkbox" id="inspired"> Inspired (Clash +1, max 4)</label>
+<!-- NEW: Separate row for checkboxes -->
+<!-- Angreifer-Regeln -->
+<div class="input-group">
+  <label>
+    <input type="checkbox" id="leader" checked>
+    Add Leader (1 extra attack)
+  </label>
+  <label>
+    <input type="checkbox" id="inspired">
+    Inspired (Clash +1, max 4)
+  </label>
+</div>
+
+        
+      
         <!-- Rule Selection -->
 <div>
   <label for="attackerSpecialRules">Add Special Rule:</label>
@@ -934,43 +947,22 @@ const resolveWounds = oblivious ? Math.ceil(failedResolve / 2) : failedResolve;
 
 
     // === Total ===
-    const simWoundsNormal = failedSaves + failedFlawless + resolveWounds;
-const simWoundsImpact = failedImpact;
-const simWoundsTrample = failedTrample;
-const simWoundsTotal = simWoundsNormal + simWoundsImpact + simWoundsTrample;
-
-results.push({
-  total: simWoundsTotal,
-  normal: simWoundsNormal,
-  impact: simWoundsImpact,
-  trample: simWoundsTrample
-});
-
+    simWounds = failedSaves + failedFlawless + failedImpact + failedTrample + resolveWounds;
+    results.push(simWounds);
   }
 
-// Calculate averages
-const avgTotal = results.reduce((a, b) => a + b.total, 0) / iterations;
-const avgNormal = results.reduce((a, b) => a + b.normal, 0) / iterations;
-const avgImpact = results.reduce((a, b) => a + b.impact, 0) / iterations;
-const avgTrample = results.reduce((a, b) => a + b.trample, 0) / iterations;
+  results.sort((a, b) => a - b);
+  const avg = results.reduce((a, b) => a + b, 0) / iterations;
+  const median = results[Math.floor(results.length / 2)];
+  const mode = results.sort((a, b) =>
+  
+    results.filter(v => v === a).length - results.filter(v => v === b).length
+  ).pop();
 
-// Median + mode from total
-const totalsSorted = results.map(r => r.total).sort((a, b) => a - b);
-const median = totalsSorted[Math.floor(totalsSorted.length / 2)];
-const mode = totalsSorted.sort((a, b) =>
-  totalsSorted.filter(v => v === a).length - totalsSorted.filter(v => v === b).length
-).pop();
-
-const resultText = `--- Simulation Results (10,000 rolls) ---\n` +
-  `Average Wounds: ${avgTotal.toFixed(2)}\n` +
-  ` - From Normal Attacks: ${avgNormal.toFixed(2)}\n` +
-  ` - From Impact Attacks: ${avgImpact.toFixed(2)}\n` +
-  ` - From Trample: ${avgTrample.toFixed(2)}\n` +
-  `Median: ${median}\n` +
-  `Mode (most frequent): ${mode}`;
-
-document.getElementById('result').innerText = resultText;
-
+  const resultText = `--- Simulation Results (10,000 rolls) ---\n` +
+    `Average Wounds: ${avg.toFixed(2)}\n` +
+    `Median: ${median}\n` +
+    `Mode (most frequent): ${mode}`;
 
   document.getElementById('result').innerText = resultText;
   // Chart erzeugen
@@ -978,8 +970,8 @@ const ctx = document.getElementById('woundChart').getContext('2d');
 
 // Häufigkeiten berechnen
 const woundCounts = {};
-results.forEach(r => {
-  woundCounts[r.total] = (woundCounts[r.total] || 0) + 1;
+results.forEach(w => {
+  woundCounts[w] = (woundCounts[w] || 0) + 1;
 });
 
 const sortedKeys = Object.keys(woundCounts).map(Number).sort((a, b) => a - b);
