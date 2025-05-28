@@ -110,8 +110,8 @@
   <input type="number" id="attacks" value="4">
   <label>Clash Value:</label>
   <input type="number" id="cllash" value="3">
-  <label></label>
-  <input type="number" id="hiddenNumber" value="5" style="visibility: hidden;">
+  <label>Volley Value:</label>
+<input type="number" id="volley" value="2">
 </div>
 
 <!-- NEW: Separate row for checkboxes -->
@@ -138,6 +138,7 @@
     <option value="">-- Select --</option>
 
 <optgroup label="— Numeric Special Rules —">
+  <option value="barrage" data-type="numeric">Barrage</option>
   <option value="brutalImpactBonus" data-type="numeric">Brutal Impact</option>
   <option value="cleaveBonus" data-type="numeric">Cleave</option>
   <option value="impactBonus" data-type="numeric">Impact Attacks</option>
@@ -160,6 +161,35 @@
   </select>
   <button type="button" onclick="addAttackerRule()">Add</button>
 </div>
+<!-- Nur sichtbar wenn Barrage aktiv ist -->
+<div id="rangedRuleSection" style="display: none; margin-top: 15px;">
+  <label for="attackerRangedRules">Add Ranged Special Rule:</label>
+  <select id="attackerRangedRules">
+    <option value="">-- Select --</option>
+	<option value="aimedShot">Aimed Shot</option>
+	<option value="armorPiercing" data-type="numeric">Armor Piercing</option>
+	<option value="deadlyShot">Deadly Shot</option>
+	<option value="preciseShot">Precise Shot</option>
+	<option value="rapidVolley">Rapid Volley</option>
+	<option value="torrentialFire">Torrential Fire</option>
+    <!-- Weitere nach Bedarf -->
+  </select>
+  <button type="button" onclick="addRangedRule()">Add</button>
+
+  <!-- NEW INPUTS: Shooting and Effective Range -->
+  <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 15px;">
+    <label style="flex: 1 1 300px;">
+      Stands that can shoot:
+      <input type="number" id="rangedStandsShooting" value="3" min="0">
+    </label>
+    <label style="flex: 1 1 300px;">
+      Stands in effective range:
+      <input type="number" id="rangedStandsEffectiveRange" value="0" min="0">
+    </label>
+  </div>
+
+  <ul id="attackerRangedRulesList" style="margin-top: 10px; list-style: none; padding: 0;"></ul>
+</div>
 
 <!-- Selected Rules Display -->
 <ul id="attackerRulesList" style="margin-top: 10px; list-style: none; padding: 0;"></ul>
@@ -181,8 +211,15 @@
     <option value="2">On roll of 1 or 2</option>
   </select>
 </div>
+<div id="relentlessConfigContainer" style="display: none; margin-top: 10px;">
+  <label for="relentlessTriggerValue">Relentless Blows Trigger:</label>
+  <select id="relentlessTriggerValue">
+    <option value="1">On roll of 1</option>
+    <option value="2">On roll of 1 or 2</option>
+  </select>
+</div>
 
-<ul id="attackerRulesList" style="margin-top: 10px;"></ul>
+
 
 
       </div>
@@ -220,6 +257,7 @@
   <option value="fearless">Fearless</option>
   <option value="flankRear">Flank or Rear Attack</option>
   <option value="ignoreResolve">Ignore Resolve</option>
+  <option value="obscured">Loose Formation / Obscured</option>
   <option value="oblivious">Oblivious</option>
   <option value="parry">Parry</option>
   <option value="phalanx">Phalanx</option>
@@ -256,12 +294,64 @@
 	<canvas id="woundChart" style="max-width: 1000px; margin-top: 30px;"></canvas>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<!-- Button zum Öffnen des Impressums -->
+<button onclick="openImpressum()" style="margin-top:40px; background-color:#2e7ccc; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
+  Impressum
+</button>
+
+<!-- Impressum-Popup (versteckt) -->
+<div id="impressumModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.8); z-index:9999;">
+  <div style="background-color:#1e1e1e; color:#f0f0f0; padding:30px; max-width:600px; margin:100px auto; border-radius:12px; position:relative;">
+    <h2 style="font-size:18px; font-weight:bold; margin-bottom:10px;">Impressum</h2>
+    <p>
+      Angaben gemäß § 5 TMG:<br><br>
+      Daniel Suhr, HF<br>
+	  ZAW BetrSt Augustdorf<br>
+      Genral Feldmarschall Rommel Kaserne<br>
+	  Von Boselager Straße 212 <br>
+      32832 Augustdorf<br>
+      Deutschland
+    </p>
+    <p>
+      <strong>Kontakt:</strong><br>
+      E-Mail: <a href="mailto:daniel.suhr@web.de" style="color:#3a9bff;">daniel.suhr@web.de</a>
+    </p>
+    <p style="margin-top:20px; font-size:14px; color:#cccccc;">
+      Dies ist ein nicht-kommerzielles Fanprojekt ohne kommerzielle Absichten. Es besteht keine Verbindung zu Para Bellum Wargames oder anderen Rechteinhabern. Alle genannten Marken und Inhalte gehören ihren jeweiligen Eigentümern.
+    </p>
+    <button onclick="closeImpressum()" style="position:absolute; top:10px; right:10px; background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">✖</button>
+  </div>
+</div>
+<script>
+  function openImpressum() {
+    document.getElementById("impressumModal").style.display = "block";
+    document.addEventListener("keydown", handleEscapeKey);
+  }
+
+  function closeImpressum() {
+    document.getElementById("impressumModal").style.display = "none";
+    document.removeEventListener("keydown", handleEscapeKey);
+  }
+
+  function handleEscapeKey(event) {
+    if (event.key === "Escape") {
+      closeImpressum();
+    }
+  }
+</script>
+
+
 <script>
 const activeAttackerRules = new Set();
 const numericAttackerRules = {};
 
 const activeDefenderRules = new Set();
 const numericDefenderRules = {};
+const activeRangedRules = new Set();
+const numericRangedRules = {};
+
 
 
 function addAttackerRule() {
@@ -276,22 +366,84 @@ function addAttackerRule() {
     if (activeAttackerRules.has(value)) return;
     activeAttackerRules.add(value);
     addRuleToUI(value, text, type);
-    if (value === "blessed") {
-  document.getElementById("blessedUsageContainer").style.display = "block";
-} else if (value === "flawless") {
-  document.getElementById("flawlessConfigContainer").style.display = "block";
+  if (value === "blessed") {
+    document.getElementById("blessedUsageContainer").style.display = "block";
+  } else if (value === "flawless") {
+    document.getElementById("flawlessConfigContainer").style.display = "block";
+  } else if (value === "relentless") {
+    document.getElementById("relentlessConfigContainer").style.display = "block";
+  } else if (value === "barrage") {
+    document.getElementById("rangedRuleSection").style.display = "block";
+  }
+
+
+
+} else if (type === "numeric") {
+  const current = numericAttackerRules[value] || 0;
+  const input = prompt(`Enter value for ${text}:`, current || 1);
+  const parsed = parseInt(input);
+  if (isNaN(parsed) || parsed <= 0) return;
+
+  numericAttackerRules[value] = parsed;
+  activeAttackerRules.add(value);
+  addRuleToUI(value, `${text} +${parsed}`, type);
+
+  // Besondere Behandlung für Barrage
+  if (value === "barrage") {
+    document.getElementById("rangedRuleSection").style.display = "block";
+  }
 }
 
+  select.value = "";
+}
 
-  } else if (type === "numeric") {
-    const current = numericAttackerRules[value] || 0;
+function addRangedRule() {
+  const select = document.getElementById("attackerRangedRules");
+  const value = select.value;
+  const text = select.options[select.selectedIndex].text;
+  const type = select.options[select.selectedIndex].dataset.type || "toggle";
+
+  if (!value || activeRangedRules.has(value)) return;
+
+  let labelText = text;
+
+  if (type === "numeric") {
+    const current = numericRangedRules?.[value] || 0;
     const input = prompt(`Enter value for ${text}:`, current || 1);
     const parsed = parseInt(input);
     if (isNaN(parsed) || parsed <= 0) return;
 
-    numericAttackerRules[value] = parsed;
-    addRuleToUI(value, `${text} +${parsed}`, type);
+    // Stelle sicher, dass das Objekt existiert
+    if (!window.numericRangedRules) {
+      window.numericRangedRules = {};
+    }
+
+    numericRangedRules[value] = parsed;
+    labelText += ` +${parsed}`;
   }
+
+  activeRangedRules.add(value);
+
+  const list = document.getElementById("attackerRangedRulesList");
+  const li = document.createElement("li");
+  li.id = "ranged_rule_" + value;
+  li.style.marginBottom = "5px";
+
+  const label = document.createElement("span");
+  label.textContent = labelText;
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "❌";
+  removeBtn.style.marginLeft = "10px";
+  removeBtn.onclick = () => {
+    activeRangedRules.delete(value);
+    if (numericRangedRules?.[value]) delete numericRangedRules[value];
+    li.remove();
+  };
+
+  li.appendChild(label);
+  li.appendChild(removeBtn);
+  list.appendChild(li);
 
   select.value = "";
 }
@@ -365,39 +517,6 @@ function isDefenderRuleActive(ruleId) {
 }
 
 
-function addDefenderRuleToUI(key, labelText, type) {
-  const list = document.getElementById("defenderRulesList");
-  const existing = document.getElementById("def_rule_" + key);
-  if (existing) existing.remove();
-
-  const li = document.createElement("li");
-  li.id = "def_rule_" + key;
-  li.style.marginBottom = "5px";
-
-  const label = document.createElement("span");
-  label.textContent = labelText + " ";
-
-  const removeBtn = document.createElement("button");
-  removeBtn.textContent = "❌";
-  removeBtn.style.marginLeft = "10px";
-  removeBtn.onclick = () => {
-    if (type === "toggle") activeDefenderRules.delete(key);
-    if (type === "numeric") delete numericDefenderRules[key];
-    li.remove();
-    if (key === "blessed") {
-      document.getElementById("defenderBlessedContainer").style.display = "none";
-    }
-  };
-
-  li.appendChild(label);
-  li.appendChild(removeBtn);
-  list.appendChild(li);
-}
-
-function isDefenderRuleActive(ruleId) {
-  return activeDefenderRules.has(ruleId);
-}
-
 function addRuleToUI(key, labelText, type) {
   const list = document.getElementById("attackerRulesList");
   const existing = document.getElementById("rule_" + key);
@@ -423,6 +542,16 @@ function addRuleToUI(key, labelText, type) {
 if (key === "flawless") {
   document.getElementById("flawlessConfigContainer").style.display = "none";
 }
+if (key === "relentless") {
+  document.getElementById("relentlessConfigContainer").style.display = "none";
+}
+if (key === "barrage") {
+  document.getElementById("rangedRuleSection").style.display = "none";
+  activeRangedRules.clear();
+  document.getElementById("attackerRangedRulesList").innerHTML = "";
+}
+
+
   };
 
   li.appendChild(label);
@@ -433,6 +562,9 @@ if (key === "flawless") {
 function isRuleActive(ruleId) {
   return activeAttackerRules.has(ruleId);
 }
+
+
+
 
 
 function calculateDamage() {
@@ -471,6 +603,9 @@ const trample = numericAttackerRules['trampleBonus'] || 0;
 const terrifying = numericAttackerRules['terrifyingBonus'] || 0;
 const impactBonus = numericAttackerRules['impactBonus'] || 0;
 const flawlessTrigger = parseInt(document.getElementById('flawlessTriggerValue')?.value || "1");
+const relentlessTrigger = parseInt(document.getElementById('relentlessTriggerValue')?.value || "1");
+const barrage = numericAttackerRules['barrage'] || 0;
+
 
 
 
@@ -492,7 +627,7 @@ const flawlessTrigger = parseInt(document.getElementById('flawlessTriggerValue')
 const indomitable = numericDefenderRules['indomitable'] || 0;
 const bastion = numericDefenderRules['bastion'] || 0;
 const tenacious = numericDefenderRules['tenacious'] || 0;
-
+const obscured = isDefenderRuleActive('obscured');
 const flankRear = isDefenderRuleActive('flankRear');
 const ignoreResolve = isDefenderRuleActive('ignoreResolve');
 const oblivious = isDefenderRuleActive('oblivious');
@@ -532,6 +667,7 @@ const ignoreTerrifying = braveryType === 'bravery' || braveryType === 'fearless'
 
   let hits = totalAttacks * baseHitChance;
 
+
   if (rerollSixes) {
   hits += totalAttacks * (1 / 6) * baseHitChance;
   }
@@ -543,9 +679,10 @@ const ignoreTerrifying = braveryType === 'bravery' || braveryType === 'fearless'
 
   // Relentless Blows: 1en unter den erfolgreichen Treffern erzeugen +1 Treffer
   if (relentless) {
-  const onesAmongHits = hits * (1 / 6);
-  hits += onesAmongHits;
-  }
+  const triggerProb = relentlessTrigger === 1 ? (1 / 6) : (2 / 6);
+  const extraHits = hits * triggerProb;
+  hits += extraHits;
+}
 
   // === IMPACT ATTACKS berechnen ===
   const totalImpact = models * impactBonus;
@@ -558,6 +695,122 @@ const ignoreTerrifying = braveryType === 'bravery' || braveryType === 'fearless'
   if (!parry && ((attackerBlessed && attackerBlessedUsage === 'impact') || flurry || (opportunists && flankRear))) {
     impactHits += totalImpact * (1 - impactHitChance) * impactHitChance;
   }
+  
+// === BARRAGE ===
+const barrageValue = numericAttackerRules['barrage'] || 0;
+let volley = +document.getElementById('volley')?.value || 0;
+
+const hasAimedShot = activeRangedRules.has('aimedShot');
+let aimedShotReroll = false;
+
+if (hasAimedShot) {
+  if (volley < 4) {
+    volley += 1;
+  } else {
+    aimedShotReroll = true;
+  }
+}
+
+const hasDeadlyShot = activeRangedRules.has('deadlyShot');
+const hasPreciseShot = activeRangedRules.has('preciseShot');
+const hasRapidVolley = activeRangedRules.has('rapidVolley');
+const hasTorrentialFire = activeRangedRules.has('torrentialFire');
+
+let barrageHits = 0;
+let barrageWounds = 0;
+
+if (barrageValue > 0) {
+  const rangedShootingStands = +document.getElementById('rangedStandsShooting')?.value || 0;
+  const effectiveRangeStands = +document.getElementById('rangedStandsEffectiveRange')?.value || 0;
+  const obscured = isDefenderRuleActive('obscured');
+  const hasLeader = document.getElementById('leader')?.checked;
+
+  const armorPiercing = numericRangedRules?.['armorPiercing'] || 0;
+  const hardened = numericDefenderRules?.['hardened'] || 0;
+  const effectiveAP = Math.max(0, armorPiercing - hardened);
+  const adjustedDefense = Math.max(0, defense - effectiveAP);
+
+  let totalBarrageAttacks = 0;
+
+  for (let i = 0; i < rangedShootingStands; i++) {
+    let base = barrageValue;
+    if (i === 0 && hasLeader) base += 1;
+    if (i < effectiveRangeStands) base += 1;
+    if (obscured) base /= 2;
+    totalBarrageAttacks += Math.ceil(base);
+  }
+
+  let trackedHits = 0;
+
+  for (let i = 0; i < totalBarrageAttacks; i++) {
+    let roll = Math.ceil(Math.random() * 6);
+    let hit = roll <= volley;
+    let usedPreciseShot = hasPreciseShot && roll === 1;
+
+    if (!hit && opportunists && flankRear) {
+      roll = Math.ceil(Math.random() * 6);
+      hit = roll <= volley;
+      usedPreciseShot = hasPreciseShot && roll === 1;
+    } else if (!hit && aimedShotReroll && roll === 6) {
+      roll = Math.ceil(Math.random() * 6);
+      hit = roll <= volley;
+      usedPreciseShot = hasPreciseShot && roll === 1;
+    }
+
+    if (hasRapidVolley && roll === 1) {
+      let saveTargetExtra = usedPreciseShot ? 0 : Math.max(adjustedDefense, evasion);
+      let saveRollExtra = Math.ceil(Math.random() * 6);
+      let failExtra = saveRollExtra > saveTargetExtra;
+
+      if (untouchable && saveRollExtra === 6) {
+        const reroll = Math.ceil(Math.random() * 6);
+        failExtra = reroll > saveTargetExtra;
+      }
+
+      if (failExtra) {
+        barrageWounds += (hasDeadlyShot && saveRollExtra === 6) ? 2 : 1;
+      }
+    }
+
+    if (hit) {
+      trackedHits++;
+      let saveTarget = usedPreciseShot ? 0 : Math.max(adjustedDefense, evasion);
+      let saveRoll = Math.ceil(Math.random() * 6);
+      let fail = saveRoll > saveTarget;
+
+      if (untouchable && saveRoll === 6) {
+        const reroll = Math.ceil(Math.random() * 6);
+        fail = reroll > saveTarget;
+      }
+
+      if (fail) {
+        barrageWounds += (hasDeadlyShot && saveRoll === 6) ? 2 : 1;
+      }
+    }
+  }
+
+  // Torrential Fire: additional auto-hits based on hits within Effective Range
+  if (hasTorrentialFire && effectiveRangeStands > 0) {
+    const bonusHits = Math.ceil(trackedHits / 2);
+    for (let i = 0; i < bonusHits; i++) {
+      let saveRoll = Math.ceil(Math.random() * 6);
+      let fail = saveRoll > Math.max(adjustedDefense, evasion);
+
+      if (untouchable && saveRoll === 6) {
+        const reroll = Math.ceil(Math.random() * 6);
+        fail = reroll > Math.max(adjustedDefense, evasion);
+      }
+
+      if (fail) barrageWounds++;
+    }
+  }
+
+  const tenaciousUsed = Math.min(barrageWounds, tenacious);
+  barrageWounds -= tenaciousUsed;
+}
+
+
+
 
   // === DEFENSE berechnen ===
   let effectiveDefense = defense;
@@ -671,39 +924,57 @@ if (untouchable) {
 
   const totalWoundsNormal = failedSaves + failedSavesFlawless + resolveWoundsNormal;
   const totalWoundsImpact = failedImpactSaves + resolveWoundsImpact;
-  const totalWounds = totalWoundsNormal + totalWoundsImpact + trampleWounds;
+  const totalWounds = totalWoundsNormal + totalWoundsImpact + trampleWounds + barrageWounds;
   // === AUSGABE vorbereiten ===
   let resultText = '';
 
   // Normale Angriffe
-  if (totalAttacks > 0) {
-    resultText += `--- Normal Attack ---\n` +
-      `Hits: ${(regularHits + flawlessHits).toFixed(1)}\n` +
-      `Failed Saves: ${(failedSaves + failedSavesFlawless).toFixed(1)}${blessedUsage === 'normal' ? ' (Defender Blessed)' : ''}${attackerBlessed && attackerBlessedUsage === 'normal' ? ' (Attacker Blessed)' : ''}${flawless ? ' (Flawless Strikes)' : ''}\n` +
-      `Failed Resolve: ${(failedResolve + failedResolveFlawless).toFixed(1)}\n` +
-      `Wounds: ${totalWoundsNormal.toFixed(1)}\n\n`;
-  }
+if (totalAttacks > 0) {
+  resultText += `--- Normal Attack ---
+Hits: ${(regularHits + flawlessHits).toFixed(1)}
+Failed Saves: ${(failedSaves + failedSavesFlawless).toFixed(1)}${blessedUsage === 'normal' ? ' (Defender Blessed)' : ''}${attackerBlessed && attackerBlessedUsage === 'normal' ? ' (Attacker Blessed)' : ''}${flawless ? ' (Flawless Strikes)' : ''}
+Failed Resolve: ${(failedResolve + failedResolveFlawless).toFixed(1)}
+Wounds: ${totalWoundsNormal.toFixed(1)}
 
-  // Impact-Angriffe
-  if (totalImpact > 0) {
-    resultText += `--- Impact Attack ---\n` +
-      `Hits: ${impactHits.toFixed(1)}\n` +
-      `Failed Saves: ${failedImpactSaves.toFixed(1)}${blessedUsage === 'impact' ? ' (Defender Blessed)' : ''}${attackerBlessed && attackerBlessedUsage === 'impact' ? ' (Attacker Blessed)' : ''}\n` +
-      `Failed Resolve: ${failedImpactResolve.toFixed(1)}\n` +
-      `Wounds: ${totalWoundsImpact.toFixed(1)}\n\n`;
-  }
+`;
+}
 
-  // Trample
-  if (trampleHits > 0) {
-    resultText += `--- Trample ---\n` +
-      `Auto-Hits (from ${models} stands): ${trampleHits}\n` +
-      `Failed Saves: ${trampleWounds.toFixed(1)}\n` +
-      `Wounds: ${trampleWounds.toFixed(1)}\n\n`;
-  }
+// Impact-Angriffe
+if (totalImpact > 0) {
+  resultText += `--- Impact Attack ---
+Hits: ${impactHits.toFixed(1)}
+Failed Saves: ${failedImpactSaves.toFixed(1)}${blessedUsage === 'impact' ? ' (Defender Blessed)' : ''}${attackerBlessed && attackerBlessedUsage === 'impact' ? ' (Attacker Blessed)' : ''}
+Failed Resolve: ${failedImpactResolve.toFixed(1)}
+Wounds: ${totalWoundsImpact.toFixed(1)}
+
+`;
+}
+
+// Trample
+if (trampleHits > 0) {
+  resultText += `--- Trample ---
+Auto-Hits (from ${models} stands): ${trampleHits}
+Failed Saves: ${trampleWounds.toFixed(1)}
+Wounds: ${trampleWounds.toFixed(1)}
+
+`;
+}
+
+// Barrage
+if (barrageValue > 0) {
+  resultText += `--- Barrage ---
+Volley Attacks: ${models} × ${barrageValue} = ${models * barrageValue}
+Hits (Volley ${volley}+): ${barrageHits.toFixed(1)}
+Wounds: ${barrageWounds.toFixed(1)}
+
+`;
+}
+
 
   // Gesamtübersicht
-  resultText += `--- Total Damage ---\n` +
-    `Overall Wounds: ${totalWounds.toFixed(1)}`;
+ resultText += `--- Total Damage ---
+Overall Wounds: ${totalWounds.toFixed(1)}`;
+
 
   // Ausgabe setzen
   document.getElementById('result').innerText = resultText;
@@ -785,6 +1056,9 @@ const terrifying = numericAttackerRules['terrifyingBonus'] || 0;
 const impactBonus = numericAttackerRules['impactBonus'] || 0;
 const attackerBlessedUsage = document.getElementById('attackerBlessedUsage').value;
 const flawlessTrigger = parseInt(document.getElementById('flawlessTriggerValue')?.value || "1");
+const relentlessTrigger = parseInt(document.getElementById('relentlessTriggerValue')?.value || "1");
+const barrage = numericAttackerRules['barrage'] || 0;
+
 
 
 // Eingaben lesen Defender
@@ -796,7 +1070,7 @@ const defense = +document.getElementById('defense').value;
 const indomitable = numericDefenderRules['indomitable'] || 0;
 const bastion = numericDefenderRules['bastion'] || 0;
 const tenacious = numericDefenderRules['tenacious'] || 0;
-
+const obscured = isDefenderRuleActive('obscured');
 const flankRear = isDefenderRuleActive('flankRear');
 const ignoreResolve = isDefenderRuleActive('ignoreResolve');
 const oblivious = isDefenderRuleActive('oblivious');
@@ -824,33 +1098,11 @@ const rerollSixes = inspired && clash + 1 > 4;
   for (let i = 0; i < iterations; i++) {
     let simWounds = 0;
 
-    // Beispielhafte Angriffssimulation (normale Treffer)
-    let hits = 0;
-    for (let j = 0; j < totalAttacks; j++) {
-     let roll = Math.ceil(Math.random() * 6);
-let hit = roll <= inspiredClash;
 
-if (!hit && rerollSixes && roll === 6) {
-  const reroll = Math.ceil(Math.random() * 6);
-  hit = reroll <= inspiredClash;
-}
-
-      if (!hit && !parry && (
-        (attackerBlessed && attackerBlessedUsage === 'normal') || flurry || (opportunists && flankRear))) {
-        roll = Math.ceil(Math.random() * 6);
-        hit = roll <= inspiredClash;
-      }
-
-      if (hit) {
-        hits++;
-        if (relentless && roll === 1) hits++;
-      }
-    }
-
+// Angriff
 let flawlessHits = 0;
 let regularHits = 0;
 
-// redo hit determination with precise tracking
 for (let j = 0; j < totalAttacks; j++) {
   let roll = Math.ceil(Math.random() * 6);
   let hit = roll <= inspiredClash;
@@ -867,17 +1119,21 @@ for (let j = 0; j < totalAttacks; j++) {
   }
 
   if (hit) {
-    if (relentless && roll === 1) {
-      hits++; // one extra for relentless
-    }
-
-    if (flawless && (flawlessTrigger === 1 ? roll === 1 : roll <= 2)) {
+    // Flawless-Strikes-Sonderregel
+    const isFlawless = flawless && (flawlessTrigger === 1 ? roll === 1 : roll <= 2);
+    if (isFlawless) {
       flawlessHits++;
     } else {
       regularHits++;
     }
+
+    // Relentless Blows triggert **zusätzlich**, auch bei Flawless
+    if (relentless && roll <= relentlessTrigger) {
+      regularHits++;
+    }
   }
 }
+
 
 
     let saveTarget = Math.max((smite ? 0 : defense) - cleave - hardened, evasion);
@@ -1012,13 +1268,124 @@ for (let j = 0; j < (failedSaves + failedFlawless + failedImpact); j++) {
     }
   }
 }
+// === Barrage ===
+const barrageValueSim = numericAttackerRules['barrage'] || 0;
+let volley = +document.getElementById('volley')?.value || 0;
+let barrageWounds = 0;
 
+if (barrageValueSim > 0) {
+  const rangedShootingStands = +document.getElementById('rangedStandsShooting')?.value || 0;
+  const effectiveRangeStands = +document.getElementById('rangedStandsEffectiveRange')?.value || 0;
+  const hasLeader = document.getElementById('leader')?.checked;
+  const obscured = isDefenderRuleActive('obscured');
+
+  const hasAimedShot = activeRangedRules.has('aimedShot');
+  const hasDeadlyShot = activeRangedRules.has('deadlyShot');
+  const hasPreciseShot = activeRangedRules.has('preciseShot');
+  const hasRapidVolley = activeRangedRules.has('rapidVolley');
+  const hasTorrentialFire = activeRangedRules.has('torrentialFire');
+  let aimedShotReroll = false;
+
+  if (hasAimedShot) {
+    if (volley < 4) {
+      volley += 1;
+    } else {
+      aimedShotReroll = true;
+    }
+  }
+
+  const armorPiercing = numericRangedRules?.['armorPiercing'] || 0;
+  const hardened = numericDefenderRules?.['hardened'] || 0;
+  const effectiveAP = Math.max(0, armorPiercing - hardened);
+  const adjustedDefense = Math.max(0, defense - effectiveAP);
+
+  let totalBarrageAttacks = 0;
+
+  for (let i = 0; i < rangedShootingStands; i++) {
+    let base = barrageValueSim;
+    if (i === 0 && hasLeader) base += 1;
+    if (i < effectiveRangeStands) base += 1;
+    if (obscured) base /= 2;
+    totalBarrageAttacks += Math.ceil(base);
+  }
+
+  let trackedHits = 0;
+
+  for (let i = 0; i < totalBarrageAttacks; i++) {
+    let roll = Math.ceil(Math.random() * 6);
+    let hit = roll <= volley;
+    let usedPreciseShot = hasPreciseShot && roll === 1;
+
+    if (!hit && opportunists && flankRear) {
+      roll = Math.ceil(Math.random() * 6);
+      hit = roll <= volley;
+      usedPreciseShot = hasPreciseShot && roll === 1;
+    } else if (!hit && aimedShotReroll && roll === 6) {
+      roll = Math.ceil(Math.random() * 6);
+      hit = roll <= volley;
+      usedPreciseShot = hasPreciseShot && roll === 1;
+    }
+
+    if (hasRapidVolley && roll === 1) {
+      let saveTargetExtra = usedPreciseShot ? 0 : Math.max(adjustedDefense, evasion);
+      let saveRollExtra = Math.ceil(Math.random() * 6);
+      let failExtra = saveRollExtra > saveTargetExtra;
+
+      if (untouchable && saveRollExtra === 6) {
+        const reroll = Math.ceil(Math.random() * 6);
+        failExtra = reroll > saveTargetExtra;
+      }
+
+      if (failExtra) {
+        barrageWounds += (hasDeadlyShot && saveRollExtra === 6) ? 2 : 1;
+      }
+    }
+
+    if (hit) {
+      trackedHits++;
+      let saveTarget = usedPreciseShot ? 0 : Math.max(adjustedDefense, evasion);
+      let saveRoll = Math.ceil(Math.random() * 6);
+      let fail = saveRoll > saveTarget;
+
+      if (untouchable && saveRoll === 6) {
+        const reroll = Math.ceil(Math.random() * 6);
+        fail = reroll > saveTarget;
+      }
+
+      if (fail) {
+        barrageWounds += (hasDeadlyShot && saveRoll === 6) ? 2 : 1;
+      }
+    }
+  }
+
+  // Torrential Fire: additional auto-hits based on hits within Effective Range
+  if (hasTorrentialFire && effectiveRangeStands > 0) {
+    const bonusHits = Math.ceil(trackedHits / 2);
+    for (let i = 0; i < bonusHits; i++) {
+      let saveRoll = Math.ceil(Math.random() * 6);
+      let fail = saveRoll > Math.max(adjustedDefense, evasion);
+
+      if (untouchable && saveRoll === 6) {
+        const reroll = Math.ceil(Math.random() * 6);
+        fail = reroll > Math.max(adjustedDefense, evasion);
+      }
+
+      if (fail) barrageWounds++;
+    }
+  }
+
+  const tenaciousUsed = Math.min(barrageWounds, tenacious);
+  barrageWounds -= tenaciousUsed;
+}
+
+
+
+// === Resolve ===
 failedResolve = Math.max(0, failedResolve - indomitable);
 const resolveWounds = oblivious ? Math.ceil(failedResolve / 2) : failedResolve;
 
-
     // === Total ===
-    simWounds = failedSaves + failedFlawless + failedImpact + failedTrample + resolveWounds;
+    simWounds = failedSaves + failedFlawless + failedImpact + failedTrample + resolveWounds + barrageWounds;
     results.push(simWounds);
   }
 
@@ -1030,10 +1397,11 @@ const resolveWounds = oblivious ? Math.ceil(failedResolve / 2) : failedResolve;
     results.filter(v => v === a).length - results.filter(v => v === b).length
   ).pop();
 
-  const resultText = `--- Simulation Results (10,000 rolls) ---\n` +
-    `Average Wounds: ${avg.toFixed(2)}\n` +
-    `Median: ${median}\n` +
-    `Mode (most frequent): ${mode}`;
+const resultText = `--- Simulation Results (10,000 rolls) ---
+Average Wounds: ${avg.toFixed(2)}
+Median: ${median}
+Mode (most frequent): ${mode}`;
+
 
   document.getElementById('result').innerText = resultText;
   // Chart erzeugen
@@ -1086,54 +1454,11 @@ window.woundChartInstance = new Chart(ctx, {
 });
 
 }
-
-
 </script>
-<!-- Button zum Öffnen des Impressums -->
-<button onclick="openImpressum()" style="margin-top:40px; background-color:#2e7ccc; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
-  Impressum
-</button>
-
-<!-- Impressum-Popup (versteckt) -->
-<div id="impressumModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.8); z-index:9999;">
-  <div style="background-color:#1e1e1e; color:#f0f0f0; padding:30px; max-width:600px; margin:100px auto; border-radius:12px; position:relative;">
-    <h2 style="font-size:18px; font-weight:bold; margin-bottom:10px;">Impressum</h2>
-    <p>
-      Angaben gemäß § 5 TMG:<br><br>
-      Daniel Suhr, HF<br>
-	  ZAW BetrSt Augustdorf<br>
-      Genral Feldmarschall Rommel Kaserne<br>
-	  Von Boselager Straße 212 <br>
-      32832 Augustdorf<br>
-      Deutschland
-    </p>
-    <p>
-      <strong>Kontakt:</strong><br>
-      E-Mail: <a href="mailto:daniel.suhr@web.de" style="color:#3a9bff;">daniel.suhr@web.de</a>
-    </p>
-    <p style="margin-top:20px; font-size:14px; color:#cccccc;">
-      Dies ist ein nicht-kommerzielles Fanprojekt ohne kommerzielle Absichten. Es besteht keine Verbindung zu Para Bellum Wargames oder anderen Rechteinhabern. Alle genannten Marken und Inhalte gehören ihren jeweiligen Eigentümern.
-    </p>
-    <button onclick="closeImpressum()" style="position:absolute; top:10px; right:10px; background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">✖</button>
-  </div>
-</div>
 <script>
-  function openImpressum() {
-    document.getElementById("impressumModal").style.display = "block";
-    document.addEventListener("keydown", handleEscapeKey);
-  }
-
-  function closeImpressum() {
-    document.getElementById("impressumModal").style.display = "none";
-    document.removeEventListener("keydown", handleEscapeKey);
-  }
-
-  function handleEscapeKey(event) {
-    if (event.key === "Escape") {
-      closeImpressum();
-    }
-  }
-</script>
+  window.onload = () => {
+    console.log("Script loaded, addAttackerRule is available:", typeof addAttackerRule === 'function');
+  };
 </script>
 </body>
 </html>
