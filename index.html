@@ -727,6 +727,7 @@ if (barrageValue > 0) {
 
   const armorPiercing = numericRangedRules?.['armorPiercing'] || 0;
   const hardened = numericDefenderRules?.['hardened'] || 0;
+  // Hardened cancels out armor piercing before it lowers the defense
   const effectiveAP = Math.max(0, armorPiercing - hardened);
   const adjustedDefense = Math.max(0, defense - effectiveAP);
 
@@ -820,6 +821,9 @@ if (barrageValue > 0) {
     if (shield && !flankRear) effectiveDefense += 1;
   }
 
+  // Hardened lowers the attacker's cleave and brutal impact instead of reducing
+  // defense. It also reduces armor piercing from ranged attacks. Values never
+  // drop below zero.
   const reducedCleave = Math.max(0, cleave - hardened);
   const reducedBrutalImpact = Math.max(0, brutalImpact - hardened);
 
@@ -1082,7 +1086,17 @@ const blessedUsage = isDefenderRuleActive('blessed') ? document.getElementById('
 const braveryType = isDefenderRuleActive('bravery') ? 'bravery' : isDefenderRuleActive('fearless') ? 'fearless' : 'none';
 const ignoreTerrifying = braveryType === 'bravery' || braveryType === 'fearless';
 
-
+  let effectiveDefense = defense;
+  if (phalanx && !flankRear) effectiveDefense += 1;
+  if (!linebreaker) {
+    effectiveDefense += bastion;
+    if (shield && !flankRear) effectiveDefense += 1;
+  }
+  // Hardened lowers the attacker's cleave and brutal impact instead of
+  // reducing the defender's defense. It also offsets armor piercing from ranged
+  // attacks. Values never drop below zero.
+  const reducedCleave = Math.max(0, cleave - hardened);
+  const reducedBrutalImpact = Math.max(0, brutalImpact - hardened);
 
 const rerollSixes = inspired && clash + 1 > 4;
 
@@ -1135,7 +1149,7 @@ for (let j = 0; j < totalAttacks; j++) {
 
 
 
-    let saveTarget = Math.max((smite ? 0 : defense) - cleave - hardened, evasion);
+    let saveTarget = Math.max((smite ? 0 : effectiveDefense) - reducedCleave, evasion);
     let failedSaves = 0;
     for (let j = 0; j < regularHits; j++) {
       let saveRoll = Math.ceil(Math.random() * 6);
@@ -1199,7 +1213,7 @@ for (let j = 0; j < totalAttacks; j++) {
       if (hit) impactHits++;
     }
 
-    let saveImpactTarget = Math.max(defense - brutalImpact - hardened, evasion);
+    let saveImpactTarget = Math.max(effectiveDefense - reducedBrutalImpact, evasion);
     let failedImpact = 0;
     for (let j = 0; j < impactHits; j++) {
       const roll = Math.ceil(Math.random() * 6);
@@ -1225,7 +1239,7 @@ for (let j = 0; j < totalAttacks; j++) {
 
     // === Trample ===
     const trampleHits = models * trample;
-    let saveTrampleTarget = Math.max(defense - hardened, evasion);
+    let saveTrampleTarget = Math.max(effectiveDefense, evasion);
     let failedTrample = 0;
     for (let j = 0; j < trampleHits; j++) {
       const roll = Math.ceil(Math.random() * 6);
@@ -1295,6 +1309,7 @@ if (barrageValueSim > 0) {
 
   const armorPiercing = numericRangedRules?.['armorPiercing'] || 0;
   const hardened = numericDefenderRules?.['hardened'] || 0;
+  // Hardened cancels out armor piercing before adjusting defense
   const effectiveAP = Math.max(0, armorPiercing - hardened);
   const adjustedDefense = Math.max(0, defense - effectiveAP);
 
