@@ -5,6 +5,9 @@ function calculateDamage() {
     window.woundChartInstance = null;
   }
 
+  // Ensure Monte Carlo function is globally accessible
+  window.runMonteCarloSimulation = runMonteCarloSimulation;
+
   const useSimulation = document.getElementById('useSimulation').checked;
   if (useSimulation) {
     runMonteCarloSimulation();
@@ -511,8 +514,6 @@ if (window.woundChartInstance) {
     }
   }
   });
-  // Expose for global access
-  window.calculateDamage = calculateDamage;
 }
 
 function runMonteCarloSimulation() {
@@ -962,11 +963,11 @@ window.woundChartInstance = new Chart(ctx, {
     }
   }
 });
-  // Expose function for button onclick handler
-  window.runMonteCarloSimulation = runMonteCarloSimulation;
+}
+}
 
-}
-}
-  window.onload = () => {
-    console.log("Script loaded, addAttackerRule is available:", typeof addAttackerRule === 'function');
-  };
+window.calculateDamage = calculateDamage;
+
+window.onload = () => {
+  console.log("Script loaded, addAttackerRule is available:", typeof addAttackerRule === 'function');
+};
