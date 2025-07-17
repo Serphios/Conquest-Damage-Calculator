@@ -1115,9 +1115,6 @@ const flawlessTrigger = parseInt(document.getElementById('flawlessTriggerValue')
 const relentlessTrigger = parseInt(document.getElementById('relentlessTriggerValue')?.value || "1");
 const barrage = numericAttackerRules['barrage'] || 0;
 const priest = numericAttackerRules['priest'] || 0;
-const standsInContact = +document.getElementById('standsInContact').value;
-const nonContactStands = models - standsInContact;
-const totalAttacks = attacks > 0 ? standsInContact * attacks + nonContactStands * support + (leader ? 1 : 0) : 0;
 
   let priestMessage = '';
   let expectedSuccesses = 0;
