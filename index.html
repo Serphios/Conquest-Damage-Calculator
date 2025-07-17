@@ -320,37 +320,6 @@
     }
   }
 </script>
-const activeMagicRules = new Set();
-const numericMagicRules = {};
-
-  li.appendChild(label);
-  li.appendChild(removeBtn);
-  list.appendChild(li);
-
-  select.value = "";
-}
-  removeBtn.textContent = "❌";
-  removeBtn.style.marginLeft = "10px";
-  removeBtn.onclick = () => {
-    activeMagicRules.delete(value);
-    if (numericMagicRules?.[value]) delete numericMagicRules[value];
-    li.remove();
-  };
-
-  li.appendChild(label);
-  li.appendChild(removeBtn);
-  list.appendChild(li);
-
-  select.value = "";
-}
-  }
-
-  function handleEscapeKey(event) {
-    if (event.key === "Escape") {
-      closeImpressum();
-    }
-  }
-</script>
 
 
 <script>
