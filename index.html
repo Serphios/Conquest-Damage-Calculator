@@ -1097,7 +1097,7 @@ if (window.woundChartInstance) {
 }
 
 // Neuen Chart erzeugen
-window.woundChartInstance = new Chart(ctx, {
+  window.woundChartInstance = new Chart(ctx, {
   type: 'bar',
   data: {
     labels: sortedKeys,
@@ -1127,6 +1127,8 @@ window.woundChartInstance = new Chart(ctx, {
     }
   }
   });
+  // Expose for global access
+  window.calculateDamage = calculateDamage;
 }
 
 function runMonteCarloSimulation() {
@@ -1576,6 +1578,8 @@ window.woundChartInstance = new Chart(ctx, {
     }
   }
 });
+  // Expose function for button onclick handler
+  window.runMonteCarloSimulation = runMonteCarloSimulation;
 
 }
 }
