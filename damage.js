@@ -5,8 +5,6 @@ function calculateDamage() {
     window.woundChartInstance = null;
   }
 
-  // Ensure Monte Carlo function is globally accessible
-  window.runMonteCarloSimulation = runMonteCarloSimulation;
 
   const useSimulation = document.getElementById('useSimulation').checked;
   if (useSimulation) {
@@ -966,6 +964,7 @@ window.woundChartInstance = new Chart(ctx, {
 }
 }
 
+window.runMonteCarloSimulation = runMonteCarloSimulation;
 window.calculateDamage = calculateDamage;
 
 window.onload = () => {
