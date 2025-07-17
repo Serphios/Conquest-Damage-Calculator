@@ -330,6 +330,8 @@ const activeDefenderRules = new Set();
 const numericDefenderRules = {};
 const activeRangedRules = new Set();
 const numericRangedRules = {};
+const activeMagicRules = new Set();
+const numericMagicRules = {};
 
 
 
@@ -540,6 +542,14 @@ function isRuleActive(ruleId) {
   return activeAttackerRules.has(ruleId);
 }
 
+function isDefenderRuleActive(ruleId) {
+  return activeDefenderRules.has(ruleId);
+}
+
+function isMagicRuleActive(ruleId) {
+  return activeMagicRules.has(ruleId);
+}
+
 
 
 
@@ -675,7 +685,6 @@ const ignoreTerrifying = braveryType === 'bravery' || braveryType === 'fearless'
   }
   
 // === BARRAGE ===
-const barrageValue = numericAttackerRules['barrage'] || 0;
 let volley = +document.getElementById('volley')?.value || 0;
 
 const hasAimedShot = activeRangedRules.has('aimedShot');
@@ -697,7 +706,7 @@ const hasTorrentialFire = activeRangedRules.has('torrentialFire');
 let barrageHits = 0;
 let barrageWounds = 0;
 
-if (barrageValue > 0) {
+if (barrage > 0) {
   const rangedShootingStands = +document.getElementById('rangedStandsShooting')?.value || 0;
   const effectiveRangeStands = +document.getElementById('rangedStandsEffectiveRange')?.value || 0;
   const obscured = isDefenderRuleActive('obscured');
@@ -712,7 +721,7 @@ if (barrageValue > 0) {
   let totalBarrageAttacks = 0;
 
   for (let i = 0; i < rangedShootingStands; i++) {
-    let base = barrageValue;
+    let base = barrage;
     if (i === 0 && hasLeader) base += 1;
     if (i < effectiveRangeStands) base += 1;
     if (obscured) base /= 2;
@@ -919,9 +928,9 @@ Wounds: ${magicWounds.toFixed(1)}
     resultText += priestMessage + "\n";
   }
 }
-if (barrageValue > 0) {
+if (barrage > 0) {
   resultText += `--- Barrage ---
-Volley Attacks: ${models} × ${barrageValue} = ${models * barrageValue}
+Volley Attacks: ${models} × ${barrage} = ${models * barrage}
 Wounds: ${barrageWounds.toFixed(1)}
 
 `;
@@ -992,9 +1001,9 @@ Wounds: ${trampleWounds.toFixed(1)}
 }
 
 // Barrage
-if (barrageValue > 0) {
+if (barrage > 0) {
   resultText += `--- Barrage ---
-Volley Attacks: ${models} × ${barrageValue} = ${models * barrageValue}
+Volley Attacks: ${models} × ${barrage} = ${models * barrage}
 Wounds: ${barrageWounds.toFixed(1)}
 
 `;
@@ -1069,25 +1078,6 @@ const totalAttacks = attacks > 0 ? standsInContact * attacks + nonContactStands 
 const inspired = document.getElementById('inspired').checked;
 const leader = document.getElementById('leader').checked;
 const support = +document.getElementById('support').value; 
-const flurry = isRuleActive('flurry');
-const relentless = isRuleActive('relentless');
-const smite = isRuleActive('smite');
-const shock = isRuleActive('shock');
-const deadlyBlades = isRuleActive('deadlyBlades');
-const gloriousCharge = isRuleActive('gloriousCharge');
-const linebreaker = isRuleActive('linebreaker');
-const flawless = isRuleActive('flawless');
-const attackerBlessed = isRuleActive('blessed');
-const opportunists = isRuleActive('opportunists');
-const cleave = numericAttackerRules['cleaveBonus'] || 0;
-const brutalImpact = numericAttackerRules['brutalImpactBonus'] || 0;
-const trample = numericAttackerRules['trampleBonus'] || 0;
-const terrifying = numericAttackerRules['terrifyingBonus'] || 0;
-const impactBonus = numericAttackerRules['impactBonus'] || 0;
-const attackerBlessedUsage = document.getElementById('attackerBlessedUsage').value;
-const flawlessTrigger = parseInt(document.getElementById('flawlessTriggerValue')?.value || "1");
-const relentlessTrigger = parseInt(document.getElementById('relentlessTriggerValue')?.value || "1");
-const barrage = numericAttackerRules['barrage'] || 0;
 
 
 
@@ -1367,11 +1357,10 @@ for (let j = 0; j < (failedSaves + failedFlawless + failedImpact); j++) {
   if (!success) failedResolve++;
 }
 // === Barrage ===
-const barrageValueSim = numericAttackerRules['barrage'] || 0;
 let volley = +document.getElementById('volley')?.value || 0;
 let barrageWounds = 0;
 
-if (barrageValueSim > 0) {
+if (barrage > 0) {
   const rangedShootingStands = +document.getElementById('rangedStandsShooting')?.value || 0;
   const effectiveRangeStands = +document.getElementById('rangedStandsEffectiveRange')?.value || 0;
   const hasLeader = document.getElementById('leader')?.checked;
@@ -1401,7 +1390,7 @@ if (barrageValueSim > 0) {
   let totalBarrageAttacks = 0;
 
   for (let i = 0; i < rangedShootingStands; i++) {
-    let base = barrageValueSim;
+    let base = barrage;
     if (i === 0 && hasLeader) base += 1;
     if (i < effectiveRangeStands) base += 1;
     if (obscured) base /= 2;
