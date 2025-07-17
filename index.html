@@ -155,6 +155,8 @@
   <option value="linebreaker">Linebreaker</option>
   <option value="opportunists">Opportunists</option>
   <option value="relentless">Relentless Blows</option>
+  <option value="flankRear">Flank or Rear Attack</option>
+  <option value="rerollResolve">Re-roll Resolve</option>
   <option value="shock">Shock</option>
   <option value="smite">Smite</option>
 </optgroup>
@@ -254,8 +256,7 @@
   <option value="blessed">Blessed</option>
   <option value="bravery">Bravery</option>
   <option value="duelDeclined">Duel Declined</option>
-  <option value="fearless">Fearless</option>
-  <option value="flankRear">Flank or Rear Attack</option>
+  <option value="fearless">Fearless</option>
   <option value="ignoreResolve">Ignore Resolve</option>
   <option value="obscured">Loose Formation / Obscured</option>
   <option value="oblivious">Oblivious</option>
@@ -628,7 +629,8 @@ const indomitable = numericDefenderRules['indomitable'] || 0;
 const bastion = numericDefenderRules['bastion'] || 0;
 const tenacious = numericDefenderRules['tenacious'] || 0;
 const obscured = isDefenderRuleActive('obscured');
-const flankRear = isDefenderRuleActive('flankRear');
+const flankRear = isRuleActive('flankRear');
+const reRollResolve = isRuleActive('rerollResolve');
 const ignoreResolve = isDefenderRuleActive('ignoreResolve');
 const oblivious = isDefenderRuleActive('oblivious');
 const shield = isDefenderRuleActive('shield');
@@ -861,7 +863,7 @@ if (barrageValue > 0) {
   failedSavesFlawless -= tenaciousFlawless;
 
   let failedResolveFlawless = failedSavesFlawless * (1 - resolveChance);
-  if (flankRear && !ignoreResolve) {
+  if ((flankRear || reRollResolve) && !ignoreResolve) {
     failedResolveFlawless += failedSavesFlawless * resolveChance * (1 - resolveChance);
   }
   failedResolveFlawless = Math.max(0, failedResolveFlawless - indomitable);
@@ -888,7 +890,7 @@ if (untouchable) {
   }
 
   let failedResolve = failedSaves * (1 - resolveChance);
-  if (flankRear && !ignoreResolve) {
+  if ((flankRear || reRollResolve) && !ignoreResolve) {
     failedResolve += failedSaves * resolveChance * (1 - resolveChance);
   }
   failedResolve = Math.max(0, failedResolve - indomitable);
@@ -902,7 +904,7 @@ if (untouchable) {
   const rerollable = failedImpactSaves * (1 / 6);
   failedImpactSaves -= rerollable * saveChanceImpact;
 }
-  if (flankRear && !ignoreResolve) {
+  if ((flankRear || reRollResolve) && !ignoreResolve) {
     failedImpactResolve += failedImpactSaves * resolveChance * (1 - resolveChance);
   }
   failedImpactResolve = Math.max(0, failedImpactResolve - indomitable);
@@ -1074,7 +1076,8 @@ const indomitable = numericDefenderRules['indomitable'] || 0;
 const bastion = numericDefenderRules['bastion'] || 0;
 const tenacious = numericDefenderRules['tenacious'] || 0;
 const obscured = isDefenderRuleActive('obscured');
-const flankRear = isDefenderRuleActive('flankRear');
+const flankRear = isRuleActive('flankRear');
+const reRollResolve = isRuleActive('rerollResolve');
 const ignoreResolve = isDefenderRuleActive('ignoreResolve');
 const oblivious = isDefenderRuleActive('oblivious');
 const shield = isDefenderRuleActive('shield');
@@ -1272,14 +1275,19 @@ const resolveTarget = Math.min(resolveAfterTerrifying, 5);
 let failedResolve = 0;
 for (let j = 0; j < (failedSaves + failedFlawless + failedImpact); j++) {
   let roll = Math.ceil(Math.random() * 6);
-  if (roll > resolveTarget) {
+  let success = roll <= resolveTarget;
+
+  if (!success) {
     if (duelDeclined && roll === 1) {
       const reroll = Math.ceil(Math.random() * 6);
-      if (reroll > resolveTarget) failedResolve++;
-    } else {
-      failedResolve++;
+      success = reroll <= resolveTarget;
     }
+  } else if ((flankRear || reRollResolve) && !ignoreResolve) {
+    const reroll = Math.ceil(Math.random() * 6);
+    success = reroll <= resolveTarget;
   }
+
+  if (!success) failedResolve++;
 }
 // === Barrage ===
 const barrageValueSim = numericAttackerRules['barrage'] || 0;
