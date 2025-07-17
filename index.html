@@ -440,6 +440,31 @@ function addRangedRule() {
     numericRangedRules[value] = parsed;
     labelText += ` +${parsed}`;
   }
+  activeRangedRules.add(value);
+
+  const list = document.getElementById("attackerRangedRulesList");
+  const li = document.createElement("li");
+  li.id = "ranged_rule_" + value;
+  li.style.marginBottom = "5px";
+
+  const label = document.createElement("span");
+  label.textContent = labelText;
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "❌";
+  removeBtn.style.marginLeft = "10px";
+  removeBtn.onclick = () => {
+    activeRangedRules.delete(value);
+    if (numericRangedRules?.[value]) delete numericRangedRules[value];
+    li.remove();
+  };
+
+  li.appendChild(label);
+  li.appendChild(removeBtn);
+  list.appendChild(li);
+
+  select.value = "";
+}
 
 
 function addMagicRule() {
@@ -478,31 +503,6 @@ function addMagicRule() {
   removeBtn.onclick = () => {
     activeMagicRules.delete(value);
     if (numericMagicRules[value]) delete numericMagicRules[value];
-    li.remove();
-  };
-
-  li.appendChild(label);
-  li.appendChild(removeBtn);
-  list.appendChild(li);
-
-  select.value = "";
-}
-  activeRangedRules.add(value);
-
-  const list = document.getElementById("attackerRangedRulesList");
-  const li = document.createElement("li");
-  li.id = "ranged_rule_" + value;
-  li.style.marginBottom = "5px";
-
-  const label = document.createElement("span");
-  label.textContent = labelText;
-
-  const removeBtn = document.createElement("button");
-  removeBtn.textContent = "❌";
-  removeBtn.style.marginLeft = "10px";
-  removeBtn.onclick = () => {
-    activeRangedRules.delete(value);
-    if (numericRangedRules?.[value]) delete numericRangedRules[value];
     li.remove();
   };
 
