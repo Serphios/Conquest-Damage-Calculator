@@ -304,95 +304,21 @@
 <!-- Display selected rules -->
 <ul id="defenderRulesList" style="margin-top: 10px; list-style: none; padding: 0;"></ul>
 
-<!-- Conditional input for Blessed Usage -->
-<div id="defenderBlessedContainer" style="display: none; margin-top: 10px;">
-  <label for="defenderBlessed">Blessed Usage:</label>
-  <select id="defenderBlessed">
-    <option value="none">None</option>
-    <option value="normal">Normal Attack</option>
-    <option value="impact">Impact Attack</option>
-  </select>
-</div>
-      </div>
-    </div>
-
-    <div class="section">
-      <button onclick="calculateDamage()">Calculate Damage</button>
-	  <label><input type="checkbox" id="useSimulation" checked> Use Simulation (10,000 rolls)</label>
-    </div>
-
-    <div class="result" id="result"></div>
-	<canvas id="woundChart" style="max-width: 1000px; margin-top: 30px;"></canvas>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
-<!-- Button zum Öffnen des Impressums -->
-</div>
 <script>
   function openImpressum() {
     document.getElementById("impressumModal").style.display = "block";
     document.addEventListener("keydown", handleEscapeKey);
-  }
-
   function closeImpressum() {
     document.getElementById("impressumModal").style.display = "none";
     document.removeEventListener("keydown", handleEscapeKey);
-const activeDefenderRules = new Set();
-const numericDefenderRules = {};
-const activeRangedRules = new Set();
-const numericRangedRules = {};
+  function handleEscapeKey(event) {
+    if (event.key === "Escape") {
+      closeImpressum();
+    }
+  }
+</script>
 const activeMagicRules = new Set();
 const numericMagicRules = {};
-  if (value === "barrage") {
-    document.getElementById("rangedRuleSection").style.display = "block";
-  } else if (value === "priest") {
-    document.getElementById("magicRuleSection").style.display = "block";
-  }
-}
-  list.appendChild(li);
-
-  select.value = "";
-}
-
-function addMagicRule() {
-  const select = document.getElementById("attackerMagicRules");
-  const value = select.value;
-  const text = select.options[select.selectedIndex].text;
-  const type = select.options[select.selectedIndex].dataset.type || "toggle";
-
-  if (!value || activeMagicRules.has(value)) return;
-
-  let labelText = text;
-
-  if (type === "numeric") {
-    const current = numericMagicRules[value] || 0;
-    const input = prompt(`Enter value for ${text}:`, current || 1);
-    const parsed = parseInt(input);
-    if (isNaN(parsed) || parsed <= 0) return;
-
-    numericMagicRules[value] = parsed;
-    labelText += ` +${parsed}`;
-  }
-
-  activeMagicRules.add(value);
-
-  const list = document.getElementById("attackerMagicRulesList");
-  const li = document.createElement("li");
-  li.id = "magic_rule_" + value;
-  li.style.marginBottom = "5px";
-
-  const label = document.createElement("span");
-  label.textContent = labelText;
-
-  const removeBtn = document.createElement("button");
-  removeBtn.textContent = "❌";
-  removeBtn.style.marginLeft = "10px";
-  removeBtn.onclick = () => {
-    activeMagicRules.delete(value);
-    if (numericMagicRules[value]) delete numericMagicRules[value];
-    li.remove();
-  };
 
   li.appendChild(label);
   li.appendChild(removeBtn);
@@ -503,6 +429,52 @@ function addRangedRule() {
     labelText += ` +${parsed}`;
   }
 
+
+function addMagicRule() {
+  const select = document.getElementById("attackerMagicRules");
+  const value = select.value;
+  const text = select.options[select.selectedIndex].text;
+  const type = select.options[select.selectedIndex].dataset.type || "toggle";
+
+  if (!value || activeMagicRules.has(value)) return;
+
+  let labelText = text;
+
+  if (type === "numeric") {
+    const current = numericMagicRules[value] || 0;
+    const input = prompt(`Enter value for ${text}:`, current || 1);
+    const parsed = parseInt(input);
+    if (isNaN(parsed) || parsed <= 0) return;
+
+    numericMagicRules[value] = parsed;
+    labelText += ` +${parsed}`;
+  }
+
+  activeMagicRules.add(value);
+
+  const list = document.getElementById("attackerMagicRulesList");
+  const li = document.createElement("li");
+  li.id = "magic_rule_" + value;
+  li.style.marginBottom = "5px";
+
+  const label = document.createElement("span");
+  label.textContent = labelText;
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "❌";
+  removeBtn.style.marginLeft = "10px";
+  removeBtn.onclick = () => {
+    activeMagicRules.delete(value);
+    if (numericMagicRules[value]) delete numericMagicRules[value];
+    li.remove();
+  };
+
+  li.appendChild(label);
+  li.appendChild(removeBtn);
+  list.appendChild(li);
+
+  select.value = "";
+}
   activeRangedRules.add(value);
 
   const list = document.getElementById("attackerRangedRulesList");
