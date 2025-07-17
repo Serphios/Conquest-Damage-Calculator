@@ -518,94 +518,17 @@ function addDefenderRuleToUI(key, labelText, type) {
   label.textContent = labelText + " ";
 
   const removeBtn = document.createElement("button");
-  const existingRule = document.getElementById("rule_" + key);
-  if (existingRule) existingRule.remove();
-
-  const li = document.createElement("li");
-  li.id = "rule_" + key;
-  li.style.marginBottom = "5px";
-
-  const label = document.createElement("span");
-  label.textContent = labelText + " ";
-
-  const removeBtn = document.createElement("button");
   removeBtn.textContent = "❌";
   removeBtn.style.marginLeft = "10px";
   removeBtn.onclick = () => {
-    if (type === "toggle") activeAttackerRules.delete(key);
-    if (type === "numeric") delete numericAttackerRules[key];
-if (key === "barrage") {
-  document.getElementById("rangedRuleSection").style.display = "none";
-  activeRangedRules.clear();
-  document.getElementById("attackerRangedRulesList").innerHTML = "";
-}
-if (key === "priest") {
-  document.getElementById("magicRuleSection").style.display = "none";
-  activeMagicRules.clear();
-  document.getElementById("attackerMagicRulesList").innerHTML = "";
-}
-function isRuleActive(ruleId) {
-  return activeAttackerRules.has(ruleId);
-}
+    if (type === "toggle") activeDefenderRules.delete(key);
+    if (type === "numeric") delete numericDefenderRules[key];
 
-function isMagicRuleActive(ruleId) {
-  return activeMagicRules.has(ruleId);
-}
-const barrage = numericAttackerRules['barrage'] || 0;
-const priest = numericAttackerRules['priest'] || 0;
-const attunement = +document.getElementById('attunement').value;
-const hitsPerSuccess = +document.getElementById('hitsPerSuccess').value;
-const magicArmorPiercing = numericMagicRules['magicArmorPiercing'] || 0;
-const additionalHits = numericMagicRules['additionalHits'] || 0;
-const fixedHits = numericMagicRules['fixedHits'] || 0;
-const interference = isMagicRuleActive('interference');
-const magicFlank = isMagicRuleActive('magicFlank');
-const noResolveSpell = isMagicRuleActive('noResolve');
-const insanityKheres = isMagicRuleActive('insanityKheres');
-const priest = numericAttackerRules['priest'] || 0;
-const attunement = +document.getElementById('attunement').value;
-const hitsPerSuccess = +document.getElementById('hitsPerSuccess').value;
-const magicArmorPiercing = numericMagicRules['magicArmorPiercing'] || 0;
-const additionalHits = numericMagicRules['additionalHits'] || 0;
-const fixedHits = numericMagicRules['fixedHits'] || 0;
-const interference = isMagicRuleActive('interference');
-const magicFlank = isMagicRuleActive('magicFlank');
-const noResolveSpell = isMagicRuleActive('noResolve');
-const insanityKheres = isMagicRuleActive('insanityKheres');
-    const totalDice = priest;
-    const successChance = Math.min(attune, 6) / 6;
-    const avgSuccesses = totalDice * successChance;
-    if (avgSuccesses >= 2) {
-      const effectiveHPS = insanityKheres ? 2 : hitsPerSuccess;
-      if (fixedHits > 0) {
-        avgMagicHits = fixedHits + additionalHits;
-      } else {
-        avgMagicHits = avgSuccesses * effectiveHPS + additionalHits;
-      }
-    } else {
-      avgMagicHits = 0;
-    }
-    if (avgSuccesses < 2) {
-      priestMessage = `Spell likely fails (avg successes ${avgSuccesses.toFixed(2)})`;
-    }
-  }
-    li.remove();
     if (key === "blessed") {
-  document.getElementById("blessedUsageContainer").style.display = "none";
-}
-if (key === "flawless") {
-  document.getElementById("flawlessConfigContainer").style.display = "none";
-}
-if (key === "relentless") {
-  document.getElementById("relentlessConfigContainer").style.display = "none";
-}
-if (key === "barrage") {
-  document.getElementById("rangedRuleSection").style.display = "none";
-  activeRangedRules.clear();
-  document.getElementById("attackerRangedRulesList").innerHTML = "";
-}
+      document.getElementById("defenderBlessedContainer").style.display = "none";
+    }
 
-
+    li.remove();
   };
 
   li.appendChild(label);
