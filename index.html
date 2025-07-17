@@ -916,13 +916,15 @@ if (barrage > 0) {
   // === Normale Treffer (inkl. Deadly Blades) ===
   let baseFailedSaves = regularHits * (1 - saveChanceNormal);
 
-// Untouchable: 6en erneut würfeln, ca. 1/6 der Fehlschläge
+  // === Impact Hits ===
+  let failedImpactSaves = impactHits * (1 - saveChanceImpact);
+  const tenaciousImpact = Math.min(failedImpactSaves, tenacious);
   failedImpactSaves -= tenaciousImpact;
   let failedImpactResolve = failedImpactSaves * (1 - resolveChance);
   if (untouchable) {
-  const rerollable = failedImpactSaves * (1 / 6);
-  failedImpactSaves -= rerollable * saveChanceImpact;
-}
+    const rerollable = failedImpactSaves * (1 / 6);
+    failedImpactSaves -= rerollable * saveChanceImpact;
+  }
   if ((flankRear || reRollResolve) && !ignoreResolve) {
     failedImpactResolve += failedImpactSaves * resolveChance * (1 - resolveChance);
   }
