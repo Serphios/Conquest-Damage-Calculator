@@ -549,8 +549,8 @@ function addDefenderRuleToUI(key, labelText, type) {
   label.textContent = labelText + " ";
 
   const removeBtn = document.createElement("button");
-  const existing = document.getElementById("rule_" + key);
-  if (existing) existing.remove();
+  const existingRule = document.getElementById("rule_" + key);
+  if (existingRule) existingRule.remove();
 
   const li = document.createElement("li");
   li.id = "rule_" + key;
