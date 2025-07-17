@@ -139,6 +139,7 @@
 
 <optgroup label="— Numeric Special Rules —">
   <option value="barrage" data-type="numeric">Barrage</option>
+  <option value="priest" data-type="numeric">Priest</option>
   <option value="brutalImpactBonus" data-type="numeric">Brutal Impact</option>
   <option value="cleaveBonus" data-type="numeric">Cleave</option>
   <option value="impactBonus" data-type="numeric">Impact Attacks</option>
@@ -191,6 +192,35 @@
   </div>
 
   <ul id="attackerRangedRulesList" style="margin-top: 10px; list-style: none; padding: 0;"></ul>
+</div>
+
+<!-- Nur sichtbar wenn Priest aktiv ist -->
+<div id="magicRuleSection" style="display: none; margin-top: 15px;">
+  <label for="attackerMagicRules">Add Spell Special Rule:</label>
+  <select id="attackerMagicRules">
+    <option value="">-- Select --</option>
+    <option value="magicArmorPiercing" data-type="numeric">Armor Piercing</option>
+    <option value="additionalHits" data-type="numeric">Additional Hits</option>
+    <option value="fixedHits" data-type="numeric">Fixed Amount of Hits</option>
+    <option value="interference">Interference</option>
+    <option value="magicFlank">Flank</option>
+    <option value="noResolve">No Resolve</option>
+    <option value="insanityKheres">Insanity (Kheres)</option>
+  </select>
+  <button type="button" onclick="addMagicRule()">Add</button>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 15px;">
+    <label style="flex: 1 1 300px;">
+      Attunement:
+      <input type="number" id="attunement" value="3" min="1">
+    </label>
+    <label style="flex: 1 1 300px;">
+      Hits per Success:
+      <input type="number" id="hitsPerSuccess" value="1" min="1">
+    </label>
+  </div>
+
+  <ul id="attackerMagicRulesList" style="margin-top: 10px; list-style: none; padding: 0;"></ul>
 </div>
 
 <!-- Selected Rules Display -->
@@ -324,16 +354,72 @@
     </p>
     <button onclick="closeImpressum()" style="position:absolute; top:10px; right:10px; background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">✖</button>
   </div>
-</div>
-<script>
-  function openImpressum() {
-    document.getElementById("impressumModal").style.display = "block";
-    document.addEventListener("keydown", handleEscapeKey);
+const activeRangedRules = new Set();
+const numericRangedRules = {};
+const activeMagicRules = new Set();
+const numericMagicRules = {};
+  // Besondere Behandlung für Barrage
+  if (value === "barrage") {
+    document.getElementById("rangedRuleSection").style.display = "block";
+  }
+  // Besondere Behandlung für Priest
+  if (value === "priest") {
+    document.getElementById("magicRuleSection").style.display = "block";
+  }
+}
+function addRangedRule() {
+  select.value = "";
+}
+
+function addMagicRule() {
+  const select = document.getElementById("attackerMagicRules");
+  const value = select.value;
+  const text = select.options[select.selectedIndex].text;
+  const type = select.options[select.selectedIndex].dataset.type || "toggle";
+
+  if (!value || activeMagicRules.has(value)) return;
+
+  let labelText = text;
+
+  if (type === "numeric") {
+    const current = numericMagicRules?.[value] || 0;
+    const input = prompt(`Enter value for ${text}:`, current || 1);
+    const parsed = parseInt(input);
+    if (isNaN(parsed) || parsed <= 0) return;
+
+    if (!window.numericMagicRules) {
+      window.numericMagicRules = {};
+    }
+
+    numericMagicRules[value] = parsed;
+    labelText += ` +${parsed}`;
   }
 
-  function closeImpressum() {
-    document.getElementById("impressumModal").style.display = "none";
-    document.removeEventListener("keydown", handleEscapeKey);
+  activeMagicRules.add(value);
+
+  const list = document.getElementById("attackerMagicRulesList");
+  const li = document.createElement("li");
+  li.id = "magic_rule_" + value;
+  li.style.marginBottom = "5px";
+
+  const label = document.createElement("span");
+  label.textContent = labelText;
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "❌";
+  removeBtn.style.marginLeft = "10px";
+  removeBtn.onclick = () => {
+    activeMagicRules.delete(value);
+    if (numericMagicRules?.[value]) delete numericMagicRules[value];
+    li.remove();
+  };
+
+  li.appendChild(label);
+  li.appendChild(removeBtn);
+  list.appendChild(li);
+
+  select.value = "";
+}
   }
 
   function handleEscapeKey(event) {
@@ -520,22 +606,65 @@ function isDefenderRuleActive(ruleId) {
 
 function addRuleToUI(key, labelText, type) {
   const list = document.getElementById("attackerRulesList");
-  const existing = document.getElementById("rule_" + key);
-  if (existing) existing.remove();
+if (key === "barrage") {
+  document.getElementById("rangedRuleSection").style.display = "none";
+  activeRangedRules.clear();
+  document.getElementById("attackerRangedRulesList").innerHTML = "";
+}
+if (key === "priest") {
+  document.getElementById("magicRuleSection").style.display = "none";
+  activeMagicRules.clear();
+  document.getElementById("attackerMagicRulesList").innerHTML = "";
+}
+function isRuleActive(ruleId) {
+  return activeAttackerRules.has(ruleId);
+}
 
-  const li = document.createElement("li");
-  li.id = "rule_" + key;
-  li.style.marginBottom = "5px";
+function isMagicRuleActive(ruleId) {
+  return activeMagicRules.has(ruleId);
+}
+const brutalImpact = numericAttackerRules['brutalImpactBonus'] || 0;
+const trample = numericAttackerRules['trampleBonus'] || 0;
+const terrifying = numericAttackerRules['terrifyingBonus'] || 0;
+const impactBonus = numericAttackerRules['impactBonus'] || 0;
+const flawlessTrigger = parseInt(document.getElementById('flawlessTriggerValue')?.value || "1");
+const relentlessTrigger = parseInt(document.getElementById('relentlessTriggerValue')?.value || "1");
+const barrage = numericAttackerRules['barrage'] || 0;
+const priest = numericAttackerRules['priest'] || 0;
+const attunement = +document.getElementById('attunement').value;
+const hitsPerSuccess = +document.getElementById('hitsPerSuccess').value;
+const magicArmorPiercing = numericMagicRules['magicArmorPiercing'] || 0;
+const additionalHits = numericMagicRules['additionalHits'] || 0;
+const fixedHits = numericMagicRules['fixedHits'] || 0;
+const interference = isMagicRuleActive('interference');
+const magicFlank = isMagicRuleActive('magicFlank');
+const noResolveSpell = isMagicRuleActive('noResolve');
+const insanityKheres = isMagicRuleActive('insanityKheres');
+  const nonContactStands = models - standsInContact;
 
-  const label = document.createElement("span");
-  label.textContent = labelText + " ";
-
-  const removeBtn = document.createElement("button");
-  removeBtn.textContent = "❌";
-  removeBtn.style.marginLeft = "10px";
-  removeBtn.onclick = () => {
-    if (type === "toggle") activeAttackerRules.delete(key);
-    if (type === "numeric") delete numericAttackerRules[key];
+  // === PRIEST SPELL SUCCESS ===
+  let priestMessage = '';
+  let avgMagicHits = 0;
+  if (priest > 0) {
+    let attune = attunement - (interference ? 1 : 0);
+    if (attune < 1) attune = 1;
+    const totalDice = priest;
+    const successChance = Math.min(attune, 6) / 6;
+    const avgSuccesses = totalDice * successChance;
+    if (avgSuccesses >= 2) {
+      const effectiveHPS = insanityKheres ? 2 : hitsPerSuccess;
+      if (fixedHits > 0) {
+        avgMagicHits = fixedHits + additionalHits;
+      } else {
+        avgMagicHits = avgSuccesses * effectiveHPS + additionalHits;
+      }
+    } else {
+      avgMagicHits = 0;
+    }
+    if (avgSuccesses < 2) {
+      priestMessage = `Spell likely fails (avg successes ${avgSuccesses.toFixed(2)})`;
+    }
+  }
     li.remove();
     if (key === "blessed") {
   document.getElementById("blessedUsageContainer").style.display = "none";
@@ -898,22 +1027,56 @@ if (untouchable) {
   // === IMPACT ===
   let failedImpactSaves = impactHits * (1 - saveChanceImpact);
   const tenaciousImpact = Math.min(failedImpactSaves, tenacious);
-  failedImpactSaves -= tenaciousImpact;
-  let failedImpactResolve = failedImpactSaves * (1 - resolveChance);
-  if (untouchable) {
-  const rerollable = failedImpactSaves * (1 / 6);
-  failedImpactSaves -= rerollable * saveChanceImpact;
-}
-  if ((flankRear || reRollResolve) && !ignoreResolve) {
-    failedImpactResolve += failedImpactSaves * resolveChance * (1 - resolveChance);
-  }
-  failedImpactResolve = Math.max(0, failedImpactResolve - indomitable);
+  const resolveWoundsImpact = oblivious
+    ? Math.ceil(failedImpactResolve / 2)
+    : failedImpactResolve;
 
-  // === TRAMPLE ===
-  const trampleHits = models * trample;
-  let trampleWounds = trampleHits * (1 - saveChanceTrample);
-if (untouchable) {
-  const rerollable = trampleWounds * (1 / 6);
+  // === MAGIC DAMAGE ===
+  let magicFailedSaves = 0;
+  let magicFailedResolve = 0;
+  let magicWounds = 0;
+  if (avgMagicHits > 0) {
+    const baseDefenseMagic = insanityKheres ? resolve : defense;
+    const saveMagic = Math.max(Math.max(baseDefenseMagic - magicArmorPiercing, 0), evasion);
+    const saveChanceMagic = Math.min(saveMagic, 6) / 6;
+    magicFailedSaves = avgMagicHits * (1 - saveChanceMagic);
+    const tenaciousMagic = Math.min(magicFailedSaves, tenacious);
+    magicFailedSaves -= tenaciousMagic;
+    if (!noResolveSpell && !insanityKheres) {
+      magicFailedResolve = magicFailedSaves * (1 - resolveChance);
+      if ((magicFlank || flankRear || reRollResolve) && !ignoreResolve) {
+        magicFailedResolve += magicFailedSaves * resolveChance * (1 - resolveChance);
+      }
+      magicFailedResolve = Math.max(0, magicFailedResolve - indomitable);
+    }
+    magicWounds = magicFailedSaves + magicFailedResolve;
+  }
+
+  const totalWoundsNormal = failedSaves + failedSavesFlawless + resolveWoundsNormal;
+  const totalWoundsImpact = failedImpactSaves + resolveWoundsImpact;
+  const totalWounds = totalWoundsNormal + totalWoundsImpact + trampleWounds + barrageWounds + magicWounds;
+  // === AUSGABE vorbereiten ===
+// Barrage
+if (barrageValue > 0) {
+  resultText += `--- Barrage ---
+Volley Attacks: ${models} × ${barrageValue} = ${models * barrageValue}
+Wounds: ${barrageWounds.toFixed(1)}
+
+`;
+}
+// Magic
+if (avgMagicHits > 0) {
+  resultText += `--- Magic ---
+Hits: ${avgMagicHits.toFixed(1)}
+Failed Saves: ${magicFailedSaves.toFixed(1)}
+Failed Resolve: ${magicFailedResolve.toFixed(1)}
+Wounds: ${magicWounds.toFixed(1)}
+
+`;
+}
+if (priestMessage) {
+  resultText += priestMessage + "\n";
+}
   trampleWounds -= rerollable * saveChanceTrample;
 }
   const tenaciousTrample = Math.min(trampleWounds, tenacious);
@@ -1033,13 +1196,32 @@ window.woundChartInstance = new Chart(ctx, {
 });
 
 }
-function runMonteCarloSimulation() {
-  const iterations = 10000;
-  const results = [];
+const attackerBlessedUsage = document.getElementById('attackerBlessedUsage').value;
+const flawlessTrigger = parseInt(document.getElementById('flawlessTriggerValue')?.value || "1");
+const relentlessTrigger = parseInt(document.getElementById('relentlessTriggerValue')?.value || "1");
+const barrage = numericAttackerRules['barrage'] || 0;
+const priest = numericAttackerRules['priest'] || 0;
+const standsInContact = +document.getElementById('standsInContact').value;
+const nonContactStands = models - standsInContact;
+const totalAttacks = attacks > 0 ? standsInContact * attacks + nonContactStands * support + (leader ? 1 : 0) : 0;
 
-  // Eingaben lesen Attacker
-  const models = +document.getElementById('models').value;
-  const attacks = +document.getElementById('attacks').value;
+  let priestMessage = '';
+  let expectedSuccesses = 0;
+  if (priest > 0) {
+    const totalDice = priest;
+    let attune = attunement - (interference ? 1 : 0);
+    if (attune < 1) attune = 1;
+    const successChance = Math.min(attune, 6) / 6;
+    expectedSuccesses = totalDice * successChance;
+    if (expectedSuccesses < 2) {
+      priestMessage = `Spell likely fails (avg successes ${expectedSuccesses.toFixed(2)})`;
+    } else {
+      const hps = insanityKheres ? 2 : hitsPerSuccess;
+      let expectedHits = fixedHits > 0 ? fixedHits : expectedSuccesses * hps;
+      expectedHits += additionalHits;
+      priestMessage = `Average Spell Hits: ${expectedHits.toFixed(2)} (from ${expectedSuccesses.toFixed(2)} successes)`;
+    }
+  }
   const clash = +document.getElementById('cllash').value;
 const inspired = document.getElementById('inspired').checked;
 const leader = document.getElementById('leader').checked;
@@ -1216,25 +1398,64 @@ for (let j = 0; j < totalAttacks; j++) {
       if (hit) impactHits++;
     }
 
-    let saveImpactTarget = Math.max(effectiveDefense - reducedBrutalImpact, evasion);
-    let failedImpact = 0;
-    for (let j = 0; j < impactHits; j++) {
-      const roll = Math.ceil(Math.random() * 6);
-      if (roll > saveImpactTarget) {
-  let fail = true;
+      const trampleHits = models * trample;
+      let saveTrampleTarget = Math.max(effectiveDefense, evasion);
+      let failedTrample = 0;
+      for (let j = 0; j < trampleHits; j++) {
+        const roll = Math.ceil(Math.random() * 6);
+        if (roll > saveTrampleTarget) {
+          if (untouchable && roll === 6) {
+            const reroll = Math.ceil(Math.random() * 6);
+            if (reroll > saveTrampleTarget) failedTrample++;
+          } else {
+            failedTrample++;
+          }
+        }
+      }
 
-  if (untouchable && roll === 6) {
-    const reroll = Math.ceil(Math.random() * 6);
-    fail = reroll > saveImpactTarget;
-  }
+      const tenaciousTrample = Math.min(failedTrample, tenacious);
+      failedTrample -= tenaciousTrample;
 
-  if (fail && blessedUsage === 'impact') {
-    const blessedReroll = Math.ceil(Math.random() * 6);
-    fail = blessedReroll > saveImpactTarget;
-  }
+      // === Magic ===
+      let magicHits = 0;
+      if (priest > 0) {
+        let successes = 0;
+        let attune = attunement - (interference ? 1 : 0);
+        if (attune < 1) attune = 1;
+        for (let j = 0; j < priest; j++) {
+          if (Math.ceil(Math.random() * 6) <= attune) successes++;
+        }
+        if (successes >= 2) {
+          if (fixedHits > 0) {
+            magicHits = fixedHits;
+          } else {
+            const hps = insanityKheres ? 2 : hitsPerSuccess;
+            magicHits = successes * hps;
+          }
+          magicHits += additionalHits;
+        }
+      }
 
-  if (fail) failedImpact++;
-}
+      let saveMagicTargetBase = insanityKheres ? resolve : defense;
+      let saveMagicTarget = Math.max(Math.max(saveMagicTargetBase - magicArmorPiercing, 0), evasion);
+      let failedMagic = 0;
+      for (let j = 0; j < magicHits; j++) {
+        const roll = Math.ceil(Math.random() * 6);
+        if (roll > saveMagicTarget) {
+          if (untouchable && roll === 6) {
+            const reroll = Math.ceil(Math.random() * 6);
+            if (reroll > saveMagicTarget) failedMagic++;
+          } else {
+            failedMagic++;
+          }
+        }
+      }
+
+      const tenaciousMagic = Math.min(failedMagic, tenacious);
+      failedMagic -= tenaciousMagic;
+let failedResolve = 0;
+const resolveHits = failedSaves + failedFlawless + failedImpact + (noResolveSpell || insanityKheres ? 0 : failedMagic);
+for (let j = 0; j < resolveHits; j++) {
     }
 
     const tenaciousImpact = Math.min(failedImpact, tenacious);
@@ -1380,9 +1601,10 @@ if (barrageValueSim > 0) {
     }
   }
 
-  // Torrential Fire: additional auto-hits based on hits within Effective Range
-  if (hasTorrentialFire && effectiveRangeStands > 0) {
-    const bonusHits = Math.ceil(trackedHits / 2);
+      // === Total ===
+      simWounds = failedSaves + failedFlawless + failedImpact + failedTrample + failedMagic + resolveWounds + barrageWounds;
+const resultWithPriest = priestMessage ? resultText + "\n" + priestMessage : resultText;
+  document.getElementById('result').innerText = resultWithPriest;
     for (let i = 0; i < bonusHits; i++) {
       let saveRoll = Math.ceil(Math.random() * 6);
       let fail = saveRoll > Math.max(adjustedDefense, evasion);
