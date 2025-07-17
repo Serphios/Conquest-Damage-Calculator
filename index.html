@@ -286,7 +286,8 @@
   <option value="blessed">Blessed</option>
   <option value="bravery">Bravery</option>
   <option value="duelDeclined">Duel Declined</option>
-  <option value="fearless">Fearless</option>
+  <option value="fearless">Fearless</option>
+
   <option value="ignoreResolve">Ignore Resolve</option>
   <option value="obscured">Loose Formation / Obscured</option>
   <option value="oblivious">Oblivious</option>
@@ -308,9 +309,11 @@
   function openImpressum() {
     document.getElementById("impressumModal").style.display = "block";
     document.addEventListener("keydown", handleEscapeKey);
+  }
   function closeImpressum() {
     document.getElementById("impressumModal").style.display = "none";
     document.removeEventListener("keydown", handleEscapeKey);
+  }
   function handleEscapeKey(event) {
     if (event.key === "Escape") {
       closeImpressum();
