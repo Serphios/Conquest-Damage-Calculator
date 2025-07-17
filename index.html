@@ -1079,6 +1079,30 @@ window.woundChartInstance = new Chart(ctx, {
     labels: sortedKeys,
     datasets: [{
       label: 'Wound Frequency',
+      data: frequencies,
+      backgroundColor: '#4caf50'
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: 'Wound Distribution'
+      }
+    },
+    scales: {
+      x: {
+        title: { display: true, text: 'Wounds' }
+      },
+      y: {
+        title: { display: true, text: 'Frequency' },
+        beginAtZero: true
+      }
+    }
+  }
+});
 function runMonteCarloSimulation() {
   const iterations = 10000;
   const results = [];
