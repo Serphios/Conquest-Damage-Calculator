@@ -380,7 +380,6 @@ const resolveWounds = oblivious ? Math.ceil(failedResolve / 2) : failedResolve;
     // === Total ===
     simWounds = failedSaves + failedFlawless + failedImpact + failedTrample + resolveWounds + barrageWounds;
     results.push(simWounds);
-  }
 
   results.sort((a, b) => a - b);
   const avg = results.reduce((a, b) => a + b, 0) / iterations;
@@ -445,7 +444,6 @@ window.woundChartInstance = new Chart(ctx, {
     }
   }
 });
-}
 }
 
 function calculateDamage() {
@@ -799,6 +797,9 @@ if (untouchable) {
       priestMessage = `Average Spell Hits: ${avgHits.toFixed(2)} (from ${avgSuccesses.toFixed(2)} successes)`;
     } else {
       priestMessage = `Spell likely fails (avg successes ${avgSuccesses.toFixed(2)})`;
+    }
+  }
+
   const totalWoundsImpact = failedImpactSaves + resolveWoundsImpact;
   const totalWounds = totalWoundsNormal + totalWoundsImpact + trampleWounds + barrageWounds + magicWounds;
 if (trampleHits > 0) {
@@ -844,11 +845,7 @@ Wounds: ${magicWounds.toFixed(1)}
 }
 if (priestMessage) {
   resultText += priestMessage + "\n";
-}
-  trampleWounds -= rerollable * saveChanceTrample;
-}
-  const tenaciousTrample = Math.min(trampleWounds, tenacious);
-  trampleWounds -= tenaciousTrample;
+  }
 
   // === OBLIVIOUS (modifiziert Resolve-Wunden) ===
   const resolveWoundsNormal = oblivious
