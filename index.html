@@ -1102,7 +1102,9 @@ window.woundChartInstance = new Chart(ctx, {
       }
     }
   }
-});
+  });
+}
+
 function runMonteCarloSimulation() {
   const iterations = 10000;
   const results = [];
@@ -1264,6 +1266,13 @@ for (let j = 0; j < totalAttacks; j++) {
       let fail = roll > saveFlawlessTarget;
 
       if (fail && untouchable && roll === 6) {
+        const reroll = Math.ceil(Math.random() * 6);
+        fail = reroll > saveFlawlessTarget;
+      }
+
+      if (fail) failedFlawless++;
+    }
+
     let saveImpactTarget = Math.max(effectiveDefense - reducedBrutalImpact, evasion);
     let failedImpact = 0;
     for (let j = 0; j < impactHits; j++) {
@@ -1407,14 +1416,29 @@ if (barrage > 0) {
 
       if (untouchable && saveRollExtra === 6) {
         const reroll = Math.ceil(Math.random() * 6);
-  // Torrential Fire: additional auto-hits based on hits within Effective Range
-  if (hasTorrentialFire && effectiveRangeStands > 0) {
-    const bonusHits = Math.ceil(trackedHits / 2);
-failedResolve = Math.max(0, failedResolve - indomitable);
-failedMagicResolve = Math.max(0, failedMagicResolve - indomitable);
-const resolveWounds = oblivious ? Math.ceil((failedResolve + failedMagicResolve) / 2)
-                                : failedResolve + failedMagicResolve;
-    simWounds = failedSaves + failedFlawless + failedImpact + failedTrample + failedMagic + resolveWounds + barrageWounds;
+        failExtra = reroll > saveTargetExtra;
+      }
+
+      if (failExtra) {
+        barrageWounds += (hasDeadlyShot && saveRollExtra === 6) ? 2 : 1;
+      }
+    }
+
+    // Torrential Fire: additional auto-hits based on hits within Effective Range
+    if (hasTorrentialFire && effectiveRangeStands > 0) {
+      const bonusHits = Math.ceil(trackedHits / 2);
+      for (let i = 0; i < bonusHits; i++) {
+        let saveRoll = Math.ceil(Math.random() * 6);
+        let fail = saveRoll > Math.max(adjustedDefense, evasion);
+
+        if (untouchable && saveRoll === 6) {
+          const reroll = Math.ceil(Math.random() * 6);
+          fail = reroll > Math.max(adjustedDefense, evasion);
+        }
+
+        if (fail) barrageWounds++;
+      }
+    }
 
     if (hit) {
       trackedHits++;
