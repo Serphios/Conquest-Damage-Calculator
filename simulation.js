@@ -120,7 +120,7 @@ const rerollSixes = inspired && clash + 1 > 4;
 
 for (let i = 0; i < iterations; i++) {
   let simWounds = 0;
-
+  let failedResolve = 0;
 
 // Angriff
 let flawlessHits = 0;
@@ -288,7 +288,6 @@ for (let j = 0; j < totalImpact; j++) {
 
     const tenaciousMagic = Math.min(failedMagic, tenacious);
     failedMagic -= tenaciousMagic;
-let failedResolve = 0;
 
 let failedMagicResolve = 0;
 if (priest > 0 && magicHits > 0 && !noResolveSpell && !insanityKheres) {
