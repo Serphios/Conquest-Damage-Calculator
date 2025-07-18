@@ -261,6 +261,25 @@ for (let j = 0; j < totalImpact; j++) {
     const tenaciousTrample = Math.min(failedTrample, tenacious);
     failedTrample -= tenaciousTrample;
 
+    // === Resolve for melee/impact/trample ===
+    if (!ignoreResolve) {
+      const totalFailed = failedSaves + failedFlawless + failedImpact + failedTrample;
+      for (let j = 0; j < totalFailed; j++) {
+        let roll = Math.ceil(Math.random() * 6);
+        let success = roll <= resolveTarget;
+        if (!success) {
+          if (duelDeclined && roll === 1) {
+            const reroll = Math.ceil(Math.random() * 6);
+            success = reroll <= resolveTarget;
+          }
+        } else if ((flankRear || reRollResolve) && !ignoreResolve) {
+          const reroll = Math.ceil(Math.random() * 6);
+          success = reroll <= resolveTarget;
+        }
+        if (!success) failedResolve++;
+      }
+    }
+
     // === Magic ===
     let magicHits = 0;
     if (priest > 0) {
@@ -312,6 +331,7 @@ if (priest > 0 && magicHits > 0 && !noResolveSpell && !insanityKheres) {
     if (!success) failedMagicResolve++;
   }
 }
+failedMagicResolve = Math.max(0, failedMagicResolve - indomitable);
 // === Barrage ===
 let volley = +document.getElementById('volley')?.value || 0;
 let barrageWounds = 0;
