@@ -261,9 +261,9 @@ for (let j = 0; j < totalImpact; j++) {
     const tenaciousTrample = Math.min(failedTrample, tenacious);
     failedTrample -= tenaciousTrample;
 
-    // === Resolve for melee/impact/trample ===
+    // === Resolve for melee/impact (Trample causes no Resolve) ===
     if (!ignoreResolve) {
-      const totalFailed = failedSaves + failedFlawless + failedImpact + failedTrample;
+      const totalFailed = failedSaves + failedFlawless + failedImpact;
       for (let j = 0; j < totalFailed; j++) {
         let roll = Math.ceil(Math.random() * 6);
         let success = roll <= resolveTarget;
