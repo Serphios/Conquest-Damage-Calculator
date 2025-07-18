@@ -1,6 +1,8 @@
 function runMonteCarloSimulation() {
   const iterations = 10000;
   const results = [];
+  // track resolve failures outside the iteration loop to avoid scope issues
+  let failedResolve = 0;
 
   // Eingaben lesen Attacker
   const models = +document.getElementById('models').value;
@@ -120,7 +122,7 @@ const rerollSixes = inspired && clash + 1 > 4;
 
 for (let i = 0; i < iterations; i++) {
   let simWounds = 0;
-  let failedResolve = 0;
+  failedResolve = 0;
 
 // Angriff
 let flawlessHits = 0;
@@ -412,22 +414,6 @@ if (barrage > 0) {
     }
   }
 
-      // === Total ===
-      simWounds = failedSaves + failedFlawless + failedImpact + failedTrample + failedMagic + resolveWounds + barrageWounds;
-const resultWithPriest = priestMessage ? resultText + "\n" + priestMessage : resultText;
-  document.getElementById('result').innerText = resultWithPriest;
-    for (let i = 0; i < bonusHits; i++) {
-      let saveRoll = Math.ceil(Math.random() * 6);
-      let fail = saveRoll > Math.max(adjustedDefense, evasion);
-
-      if (untouchable && saveRoll === 6) {
-        const reroll = Math.ceil(Math.random() * 6);
-        fail = reroll > Math.max(adjustedDefense, evasion);
-      }
-
-      if (fail) barrageWounds++;
-    }
-  }
 
   const tenaciousUsed = Math.min(barrageWounds, tenacious);
   barrageWounds -= tenaciousUsed;
@@ -505,6 +491,8 @@ window.woundChartInstance = new Chart(ctx, {
       }
     }
   }
-});
+  });
 }
+}
+
 window.runMonteCarloSimulation = runMonteCarloSimulation;
