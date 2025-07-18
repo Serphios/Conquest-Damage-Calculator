@@ -315,6 +315,11 @@ if (priest > 0 && magicHits > 0 && !noResolveSpell && !insanityKheres) {
 // === Barrage ===
 let volley = +document.getElementById('volley')?.value || 0;
 let barrageWounds = 0;
+let trackedHits = 0;
+let bonusHits = 0;
+let failedBarrage = 0;
+let extraVolleyHits = 0;
+let barrageHitsCount = 0;
 
 if (barrage > 0) {
   const rangedShootingStands = +document.getElementById('rangedStandsShooting')?.value || 0;
@@ -353,11 +358,6 @@ if (barrage > 0) {
     totalBarrageAttacks += Math.ceil(base);
   }
 
-  let trackedHits = 0;
-  let bonusHits = 0;
-  let failedBarrage = 0;
-  let extraVolleyHits = 0;
-  let barrageHitsCount = 0;
 
   for (let i = 0; i < totalBarrageAttacks; i++) {
     let roll = Math.ceil(Math.random() * 6);
