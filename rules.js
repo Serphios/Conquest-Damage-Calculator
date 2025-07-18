@@ -85,6 +85,8 @@ function addAttackerRule() {
   // Besondere Behandlung für Barrage
   if (value === "barrage") {
     document.getElementById("rangedRuleSection").style.display = "block";
+  } else if (value === "priest") {
+    document.getElementById("magicRuleSection").style.display = "block";
   }
 }
 
