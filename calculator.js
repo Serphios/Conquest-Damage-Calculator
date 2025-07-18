@@ -48,6 +48,11 @@ const flawlessTrigger = parseInt(document.getElementById('flawlessTriggerValue')
 const relentlessTrigger = parseInt(document.getElementById('relentlessTriggerValue')?.value || "1");
 const barrage = numericAttackerRules['barrage'] || 0;
 
+  // Variables for priest magic effects
+  let magicFailedSaves = 0;
+  let magicFailedResolve = 0;
+  let magicWounds = 0;
+
 
 
 
@@ -393,7 +398,11 @@ if (untouchable) {
 
   const totalWoundsNormal = failedSaves + failedSavesFlawless + resolveWoundsNormal;
   const totalWoundsImpact = failedImpactSaves + resolveWoundsImpact;
-  const totalWounds = totalWoundsNormal + totalWoundsImpact + trampleWounds + barrageWounds;
+  const totalWounds = totalWoundsNormal +
+    totalWoundsImpact +
+    trampleWounds +
+    barrageWounds +
+    magicWounds;
   // === AUSGABE vorbereiten ===
   let resultText = '';
 
@@ -434,6 +443,15 @@ if (barrage > 0) {
   resultText += `--- Barrage ---
 Volley Attacks: ${models} × ${barrage} = ${models * barrage}
 Wounds: ${barrageWounds.toFixed(1)}
+
+`;
+}
+
+// Magic (Priest)
+if (priest > 0) {
+  resultText += `--- Magic ---
+${priestMessage}
+Wounds: ${magicWounds.toFixed(1)}
 
 `;
 }
