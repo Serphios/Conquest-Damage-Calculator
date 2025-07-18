@@ -450,6 +450,7 @@ Overall Wounds: ${totalWounds.toFixed(1)}`;
 const ctx = document.getElementById('woundChart').getContext('2d');
 
 // Häufigkeiten berechnen
+const results = [totalWounds];
 const woundCounts = {};
 results.forEach(w => {
   woundCounts[w] = (woundCounts[w] || 0) + 1;
