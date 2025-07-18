@@ -31,7 +31,8 @@ const priest = numericAttackerRules['priest'] || 0;
   const clash = +document.getElementById('cllash').value;
 const inspired = document.getElementById('inspired').checked;
 const leader = document.getElementById('leader').checked;
-const support = +document.getElementById('support').value; 
+const support = +document.getElementById('support').value;
+const linebreaker = isRuleActive('linebreaker');
 
 
 
