@@ -426,14 +426,14 @@ failedResolve = Math.max(0, failedResolve - indomitable);
 const resolveWounds = oblivious ? Math.ceil(failedResolve / 2) : failedResolve;
 
     // === Total ===
-    simWounds = failedSaves + failedFlawless + failedImpact + failedTrample + resolveWounds + barrageWounds;
+  simWounds = failedSaves + failedFlawless + failedImpact + failedTrample + resolveWounds + barrageWounds;
     results.push(simWounds);
+  }
 
   results.sort((a, b) => a - b);
   const avg = results.reduce((a, b) => a + b, 0) / iterations;
   const median = results[Math.floor(results.length / 2)];
   const mode = results.sort((a, b) =>
-  
     results.filter(v => v === a).length - results.filter(v => v === b).length
   ).pop();
 
@@ -492,7 +492,6 @@ window.woundChartInstance = new Chart(ctx, {
     }
   }
   });
-}
 }
 
 window.runMonteCarloSimulation = runMonteCarloSimulation;
