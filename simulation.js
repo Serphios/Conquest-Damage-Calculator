@@ -1,6 +1,10 @@
 function runMonteCarloSimulation() {
   const iterations = 10000;
   const results = [];
+  // aggregated stats across all iterations
+  let totalHits = 0;
+  let totalFailedSaves = 0;
+  let totalFailedResolve = 0;
   // track resolve failures outside the iteration loop to avoid scope issues
   let failedResolve = 0;
 
@@ -350,6 +354,10 @@ if (barrage > 0) {
   }
 
   let trackedHits = 0;
+  let bonusHits = 0;
+  let failedBarrage = 0;
+  let extraVolleyHits = 0;
+  let barrageHitsCount = 0;
 
   for (let i = 0; i < totalBarrageAttacks; i++) {
     let roll = Math.ceil(Math.random() * 6);
@@ -367,6 +375,7 @@ if (barrage > 0) {
     }
 
     if (hasRapidVolley && roll === 1) {
+      extraVolleyHits++;
       let saveTargetExtra = usedPreciseShot ? 0 : Math.max(adjustedDefense, evasion);
       let saveRollExtra = Math.ceil(Math.random() * 6);
       let failExtra = saveRollExtra > saveTargetExtra;
@@ -377,14 +386,16 @@ if (barrage > 0) {
       }
 
       if (failExtra) {
+        failedBarrage++;
         barrageWounds += (hasDeadlyShot && saveRollExtra === 6) ? 2 : 1;
       }
     }
 
     // Torrential Fire: additional auto-hits based on hits within Effective Range
     if (hasTorrentialFire && effectiveRangeStands > 0) {
-      const bonusHits = Math.ceil(trackedHits / 2);
-      for (let i = 0; i < bonusHits; i++) {
+      const bonusHitsThisRound = Math.ceil(trackedHits / 2);
+      bonusHits += bonusHitsThisRound;
+      for (let i = 0; i < bonusHitsThisRound; i++) {
         let saveRoll = Math.ceil(Math.random() * 6);
         let fail = saveRoll > Math.max(adjustedDefense, evasion);
 
@@ -393,12 +404,16 @@ if (barrage > 0) {
           fail = reroll > Math.max(adjustedDefense, evasion);
         }
 
-        if (fail) barrageWounds++;
+        if (fail) {
+          failedBarrage++;
+          barrageWounds++;
+        }
       }
     }
 
     if (hit) {
       trackedHits++;
+      barrageHitsCount++;
       let saveTarget = usedPreciseShot ? 0 : Math.max(adjustedDefense, evasion);
       let saveRoll = Math.ceil(Math.random() * 6);
       let fail = saveRoll > saveTarget;
@@ -409,6 +424,7 @@ if (barrage > 0) {
       }
 
       if (fail) {
+        failedBarrage++;
         barrageWounds += (hasDeadlyShot && saveRoll === 6) ? 2 : 1;
       }
     }
@@ -419,11 +435,21 @@ if (barrage > 0) {
   barrageWounds -= tenaciousUsed;
 }
 
+  const totalBarrageHits = barrageHitsCount + extraVolleyHits + bonusHits;
+
 
 
 // === Resolve ===
 failedResolve = Math.max(0, failedResolve - indomitable);
 const resolveWounds = oblivious ? Math.ceil(failedResolve / 2) : failedResolve;
+
+  const iterationHits = regularHits + flawlessHits + impactHits + trampleHits + magicHits + totalBarrageHits;
+  const iterationFailedSaves = failedSaves + failedFlawless + failedImpact + failedTrample + failedMagic + failedBarrage;
+  const iterationFailedResolve = failedResolve + failedMagicResolve;
+
+  totalHits += iterationHits;
+  totalFailedSaves += iterationFailedSaves;
+  totalFailedResolve += iterationFailedResolve;
 
     // === Total ===
   simWounds = failedSaves + failedFlawless + failedImpact + failedTrample + resolveWounds + barrageWounds;
@@ -437,7 +463,14 @@ const resolveWounds = oblivious ? Math.ceil(failedResolve / 2) : failedResolve;
     results.filter(v => v === a).length - results.filter(v => v === b).length
   ).pop();
 
+  const avgHits = totalHits / iterations;
+  const avgFailedSaves = totalFailedSaves / iterations;
+  const avgFailedResolve = totalFailedResolve / iterations;
+
 const resultText = `--- Simulation Results (10,000 rolls) ---
+Average Hits: ${avgHits.toFixed(2)}
+Average Failed Saves: ${avgFailedSaves.toFixed(2)}
+Average Failed Resolves: ${avgFailedResolve.toFixed(2)}
 Average Wounds: ${avg.toFixed(2)}
 Median: ${median}
 Mode (most frequent): ${mode}`;
