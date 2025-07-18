@@ -310,6 +310,24 @@ if (barrage > 0) {
 
   // === Normale Treffer (inkl. Deadly Blades) ===
   let baseFailedSaves = regularHits * (1 - saveChanceNormal);
+  if (untouchable) {
+    const rerollable = baseFailedSaves * (1 / 6);
+    baseFailedSaves -= rerollable * saveChanceNormal;
+  }
+
+  let failedSaves = baseFailedSaves;
+  const tenaciousNormal = Math.min(failedSaves, tenacious);
+  failedSaves -= tenaciousNormal;
+  if (deadlyBlades) {
+    const deadly = Math.floor(failedSaves * (1 / 6));
+    failedSaves += deadly;
+  }
+
+  let failedResolve = failedSaves * (1 - resolveChance);
+  if ((flankRear || reRollResolve) && !ignoreResolve) {
+    failedResolve += failedSaves * resolveChance * (1 - resolveChance);
+  }
+  failedResolve = Math.max(0, failedResolve - indomitable);
 
   // === Impact Hits ===
   let failedImpactSaves = impactHits * (1 - saveChanceImpact);
