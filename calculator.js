@@ -345,6 +345,7 @@ if (untouchable) {
           magicFailedResolve += magicFailedSaves * resolveChance * (1 - resolveChance);
         }
         magicFailedResolve = Math.max(0, magicFailedResolve - indomitable);
+    }
       magicWounds = magicFailedSaves + magicFailedResolve;
       priestMessage = `Average Spell Hits: ${avgHits.toFixed(2)} (from ${avgSuccesses.toFixed(2)} successes)`;
     } else {
@@ -352,52 +353,6 @@ if (untouchable) {
     }
   }
 
-  const totalWoundsImpact = failedImpactSaves + resolveWoundsImpact;
-  const totalWounds = totalWoundsNormal + totalWoundsImpact + trampleWounds + barrageWounds + magicWounds;
-if (trampleHits > 0) {
-  resultText += `--- Trample ---
-Auto-Hits (from ${models} stands): ${trampleHits}
-Failed Saves: ${trampleWounds.toFixed(1)}
-Wounds: ${trampleWounds.toFixed(1)}
-
-`;
-}
-
-// Magic
-if (magicWounds > 0 || priestMessage) {
-  if (magicWounds > 0) {
-    resultText += `--- Magic ---
-Hits: ${(magicFailedSaves + magicFailedResolve).toFixed(1)}
-Failed Saves: ${magicFailedSaves.toFixed(1)}
-Failed Resolve: ${magicFailedResolve.toFixed(1)}
-Wounds: ${magicWounds.toFixed(1)}
-
-`;
-  }
-  if (priestMessage) {
-    resultText += priestMessage + "\n";
-  }
-}
-if (barrage > 0) {
-  resultText += `--- Barrage ---
-Volley Attacks: ${models} × ${barrage} = ${models * barrage}
-Wounds: ${barrageWounds.toFixed(1)}
-
-`;
-}
-// Magic
-if (avgMagicHits > 0) {
-  resultText += `--- Magic ---
-Hits: ${avgMagicHits.toFixed(1)}
-Failed Saves: ${magicFailedSaves.toFixed(1)}
-Failed Resolve: ${magicFailedResolve.toFixed(1)}
-Wounds: ${magicWounds.toFixed(1)}
-
-`;
-}
-if (priestMessage) {
-  resultText += priestMessage + "\n";
-  }
 
   // === OBLIVIOUS (modifiziert Resolve-Wunden) ===
   const resolveWoundsNormal = oblivious
