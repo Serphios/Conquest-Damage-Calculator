@@ -472,7 +472,9 @@ const resolveWounds = oblivious ? Math.ceil(failedResolve / 2) : failedResolve;
   totalFailedResolve += iterationFailedResolve;
 
     // === Total ===
-  simWounds = failedSaves + failedFlawless + failedImpact + failedTrample + resolveWounds + barrageWounds;
+  const resolveWoundsMagic = oblivious ? Math.ceil(failedMagicResolve / 2) : failedMagicResolve;
+  simWounds = failedSaves + failedFlawless + failedImpact + failedTrample +
+    resolveWounds + failedMagic + resolveWoundsMagic + barrageWounds;
     results.push(simWounds);
   }
 
