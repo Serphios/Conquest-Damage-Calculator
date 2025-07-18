@@ -10,6 +10,33 @@ const flawlessTrigger = parseInt(document.getElementById('flawlessTriggerValue')
 const relentlessTrigger = parseInt(document.getElementById('relentlessTriggerValue')?.value || "1");
 const barrage = numericAttackerRules['barrage'] || 0;
 const priest = numericAttackerRules['priest'] || 0;
+  // Toggle and numeric attacker rules
+  const flurry = isRuleActive('flurry');
+  const relentless = isRuleActive('relentless');
+  const smite = isRuleActive('smite');
+  const shock = isRuleActive('shock');
+  const deadlyBlades = isRuleActive('deadlyBlades');
+  const gloriousCharge = isRuleActive('gloriousCharge');
+  const linebreaker = isRuleActive('linebreaker');
+  const flawless = isRuleActive('flawless');
+  const attackerBlessed = isRuleActive('blessed');
+  const opportunists = isRuleActive('opportunists');
+  const cleave = numericAttackerRules['cleaveBonus'] || 0;
+  const brutalImpact = numericAttackerRules['brutalImpactBonus'] || 0;
+  const trample = numericAttackerRules['trampleBonus'] || 0;
+  const terrifying = numericAttackerRules['terrifyingBonus'] || 0;
+  const impactBonus = numericAttackerRules['impactBonus'] || 0;
+
+  // Magic related inputs and rules
+  const attunement = +document.getElementById('attunement')?.value || 1;
+  const hitsPerSuccess = +document.getElementById('hitsPerSuccess')?.value || 1;
+  const magicArmorPiercing = numericMagicRules['magicArmorPiercing'] || 0;
+  const additionalHits = numericMagicRules['additionalHits'] || 0;
+  const fixedHits = numericMagicRules['fixedHits'] || 0;
+  const interference = isMagicRuleActive('interference');
+  const magicFlank = isMagicRuleActive('magicFlank');
+  const noResolveSpell = isMagicRuleActive('noResolve');
+  const insanityKheres = isMagicRuleActive('insanityKheres');
 
   let priestMessage = '';
   let expectedSuccesses = 0;
@@ -32,7 +59,7 @@ const priest = numericAttackerRules['priest'] || 0;
 const inspired = document.getElementById('inspired').checked;
 const leader = document.getElementById('leader').checked;
 const support = +document.getElementById('support').value;
-const linebreaker = isRuleActive('linebreaker');
+
 
 
 
@@ -59,6 +86,16 @@ const blessedUsage = isDefenderRuleActive('blessed') ? document.getElementById('
 const braveryType = isDefenderRuleActive('bravery') ? 'bravery' : isDefenderRuleActive('fearless') ? 'fearless' : 'none';
 const ignoreTerrifying = braveryType === 'bravery' || braveryType === 'fearless';
 
+  // Resolve bonus and target calculations
+  let resolveBonus = 0;
+  if (defenderStands >= 4 && defenderStands <= 6) resolveBonus = 1;
+  else if (defenderStands >= 7 && defenderStands <= 9) resolveBonus = 2;
+  else if (defenderStands >= 10) resolveBonus = 3;
+  if (phalanx && !flankRear) resolveBonus += 1;
+  const effectiveResolve = resolve + resolveBonus;
+  const totalTerrifying = terrifying + (gloriousCharge ? 1 : 0);
+  const resolveTarget = Math.max(1, effectiveResolve - (ignoreTerrifying ? 0 : totalTerrifying));
+
   let effectiveDefense = defense;
   if (phalanx && !flankRear) effectiveDefense += 1;
   if (!linebreaker) {
@@ -81,8 +118,8 @@ const rerollSixes = inspired && clash + 1 > 4;
   const nonContactStands = models - standsInContact;
   const totalAttacks = attacks > 0 ? standsInContact * attacks + nonContactStands * support + (leader ? 1 : 0) : 0;
 
-  for (let i = 0; i < iterations; i++) {
-    let simWounds = 0;
+for (let i = 0; i < iterations; i++) {
+  let simWounds = 0;
 
 
 // Angriff
@@ -118,6 +155,19 @@ for (let j = 0; j < totalAttacks; j++) {
       regularHits++;
     }
   }
+}
+
+// Impact attacks
+const totalImpact = models * impactBonus;
+let impactHits = 0;
+for (let j = 0; j < totalImpact; j++) {
+  let roll = Math.ceil(Math.random() * 6);
+  let hit = roll <= clashImpact;
+  if (!hit && !parry && ((attackerBlessed && attackerBlessedUsage === 'impact') || flurry || (opportunists && flankRear))) {
+    roll = Math.ceil(Math.random() * 6);
+    hit = roll <= clashImpact;
+  }
+  if (hit) impactHits++;
 }
 
 
@@ -191,6 +241,18 @@ for (let j = 0; j < totalAttacks; j++) {
 
     // === Trample ===
     const trampleHits = models * trample;
+    let failedTrample = 0;
+    const saveTrampleTarget = Math.max(effectiveDefense, evasion);
+    for (let j = 0; j < trampleHits; j++) {
+      let roll = Math.ceil(Math.random() * 6);
+      let fail = roll > saveTrampleTarget;
+      if (untouchable && roll === 6) {
+        const reroll = Math.ceil(Math.random() * 6);
+        fail = reroll > saveTrampleTarget;
+      }
+      if (fail) failedTrample++;
+    }
+    const tenaciousTrample = Math.min(failedTrample, tenacious);
     failedTrample -= tenaciousTrample;
 
     // === Magic ===
